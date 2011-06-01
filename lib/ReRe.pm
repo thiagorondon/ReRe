@@ -28,6 +28,8 @@ with some features like:
 
 =over
 
+=item Access your Redis database directly from Javascript.
+
 =item Config file for store users and access control list.
 
 =item REST interface to make your life more easy in some world.

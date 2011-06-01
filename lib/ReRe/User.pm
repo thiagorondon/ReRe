@@ -42,8 +42,8 @@ sub _setup {
         $self->_add_user(
             $username => {
                 $password ? ( password => $password ) : (),
-                $allow ? ( allow => [ split( / /, $allow ) ] ) : (),
-                roles => [ split( / /, $roles ) ]
+                $allow ? ( allow => [ split(' ' , $allow ) ] ) : (),
+                roles => [ split(' ', $roles ) ]
             }
         );
     }
@@ -67,7 +67,28 @@ sub auth {
     return 0 unless $username and $password;
     my $user = $self->_find_user($username) or return 0;
     my $mem_password = $user->{password};
-    return $mem_password eq $password ? 1 : 0;
+    return $mem_password eq $password ? $username : 0;
+}
+
+=head2 auth_ip
+
+Authentication by IP
+
+($ip)
+
+=cut
+
+sub auth_ip {
+    my ( $self, $ip ) = @_;
+    return 0 unless $ip;
+    my %users = $self->_all_users;
+    foreach my $user ( keys %users ) {
+        my ( @roles, @allow );
+        @allow = @{ $users{$user}{allow} } if defined( $users{$user}{allow} );
+        @roles = @{ $users{$user}{roles} } if defined( $users{$user}{roles} );
+        return $user if grep( /$ip|all/, @allow );
+    }
+    return 0;
 }
 
 =head2 has_role
