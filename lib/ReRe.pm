@@ -2,17 +2,17 @@
 package ReRe;
 
 use Moose;
-use ReRe::ACL;
+use ReRe::User;
 use ReRe::Server;
 
 # ABSTRACT: Simple Redis Rest Interface
 # VERSION
 
-has acl => (
+has user => (
     is => 'ro',
-    isa => 'ReRe::ACL',
+    isa => 'ReRe::User',
     lazy => 1,
-    default => sub { ReRe::ACL->new( { file => 'etc/users.conf' }) }
+    default => sub { ReRe::User->new( { file => 'etc/users.conf' }) }
 );
 
 has server => (
@@ -31,7 +31,7 @@ Start masterplan.
 
 sub start {
     my $self = shift;
-    $self->acl->process;
+    $self->user->process;
     $self->server(ReRe::Server->new);
 }
 

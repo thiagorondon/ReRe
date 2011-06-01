@@ -21,6 +21,6 @@ ok($acl->has_role('userall', 'get'));
 ok($acl->auth('userro', 'userro'));
 ok(!$acl->auth('userrw', 'error'));
 
-ok($acl->has_role('userallowall', 'get', '127.0.0.1'));
-ok(!$acl->has_role('userro', 'set', '127.0.0.1'));
+ok($acl->has_role('', 'get', '127.0.0.1'));
+ok(!$acl->has_role('', 'set', '127.0.0.3'));
 

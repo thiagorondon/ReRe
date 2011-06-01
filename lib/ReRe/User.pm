@@ -8,42 +8,44 @@ use Data::Dumper;
 # VERSION
 
 has file => (
-    is => 'rw',
-    isa => 'Str',
+    is       => 'rw',
+    isa      => 'Str',
     required => 1
 );
 
 has _users => (
-    is => 'ro',
-    isa => 'HashRef[HashRef]',
-    traits => ['Hash'],
+    is      => 'ro',
+    isa     => 'HashRef[HashRef]',
+    traits  => ['Hash'],
     default => sub { {} },
     handles => {
-        _add_user => 'set',
-        _find_user => 'get'
+        _add_user  => 'set',
+        _find_user => 'get',
+        _all_users => 'elements'
     }
 );
 
 sub _parse_config {
     my $self = shift;
     die "Where is config file for acl ?" unless -r $self->file;
-    my $conf = new Config::General($self->file);
+    my $conf = new Config::General( $self->file );
     return $conf->getall;
 }
 
 sub _setup {
-    my $self = shift;
+    my $self   = shift;
     my %config = $self->_parse_config;
-    foreach my $username (keys $config{users}) {
+    foreach my $username ( keys $config{users} ) {
         my $password = $config{users}{$username}{password};
-        my $roles = $config{users}{$username}{roles};
-        my $allow = $config{users}{$username}{allow};
+        my $roles    = $config{users}{$username}{roles};
+        my $allow    = $config{users}{$username}{allow};
         $self->_add_user(
             $username => {
-                $password ? (password => $password) : (),
-                $allow ? (allow => [ split(/ /, $allow) ]) : (),
-                roles => [ split(/ /, $roles) ]
-            });
+                $password ? ( password => $password ) : (),
+                $allow ? ( allow => [ split( / /, $allow ) ] ) : (),
+                roles => [ split( / /, $roles ) ]
+            }
+        );
     }
 
 }
@@ -61,7 +63,7 @@ Authentication
 =cut
 
 sub auth {
-    my ($self, $username, $password) = @_;
+    my ( $self, $username, $password ) = @_;
     return 0 unless $username and $password;
     my $user = $self->_find_user($username) or return 0;
     my $mem_password = $user->{password};
@@ -77,13 +79,31 @@ Autorization
 =cut
 
 sub has_role {
-    my ($self, $username, $role, $ip) = @_;
+    my ( $self, $username, $role, $ip ) = @_;
     return 0 unless $role;
-    my $user = $self->_find_user($username) or return 0;
-    my (@roles, @allow);
-    @roles = @{$user->{roles}} if defined($user->{roles});
-    @allow = @{$user->{allow}} if defined($user->{allow});
-    return grep(/$role|all/, @roles) or grep(/$ip|all/, @allow) ? 1 : 0;
+    return $self->_user_has_role( $username, $role, $ip ) if $username;
+    return $self->_ip_has_role( $role, $ip ) if $ip;
+    return 0;
+}
+
+sub _ip_has_role {
+    my ( $self, $role, $ip ) = @_;
+    my %users = $self->_all_users;
+    foreach my $user ( keys %users ) {
+        my @allow;
+        @allow = @{ $users{$user}{allow} } if defined( $users{$user}{allow} );
+        return 1 if grep( /$ip|all/, @allow );
+    }
+    return 0;
+}
+
+sub _user_has_role {
+    my ( $self, $username, $role, $ip ) = @_;
+    my $user = $self->_find_user($username);
+    my ( @roles, @allow );
+    @roles = @{ $user->{roles} } if defined( $user->{roles} );
+    @allow = @{ $user->{allow} } if defined( $user->{allow} );
+    return grep( /$role|all/, @roles ) or grep( /$ip|all/, @allow ) ? 1 : 0;
 }
 
 =head2 process

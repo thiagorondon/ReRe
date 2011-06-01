@@ -19,7 +19,7 @@ get '/login' => sub {
     my $password = $self->param('password') || '';
 
     return $self->render_json( { login => 0 } )
-      unless $rere->acl->auth( $username, $password );
+      unless $rere->user->auth( $username, $password );
 
     $self->session( name => $username );
     $self->render_json( { login => 1 } );
@@ -31,23 +31,21 @@ get '/logout' => sub {
     $self->render_json( { logout => 1 } );
 } => 'logout';
 
-get '/redis/:method/:var/:value' => sub {
+get '/redis/:method/:var/:value' => { value => '' } => sub {
     my $self   = shift;
     my $method = $self->stash('method');
     my $var    = $self->stash('var');
-    my $value  = $self->stash('value');    # not here..
+    my $value  = $self->stash('value');
 
-    my $username = 'userrw';               #$self->session('name') || '';
-
-    warn $method;
+    my $username = $self->session('name') || '';
 
     return $self->render_json( { err => 'no_method' } )
       unless $rere->server->has_method($method);
 
     return $self->render_json( { err => 'no_permission' } )
-      unless $rere->acl->has_role( $username, $method );
+      unless $rere->user->has_role( $username, $method,
+          $self->tx->remote_address );
 
-    # fix ............
     my $ret;
     if ( $method eq 'set' ) {
         $ret = $rere->server->execute( $method, $var => $value );
@@ -56,7 +54,7 @@ get '/redis/:method/:var/:value' => sub {
         $ret = $rere->server->execute( $method, $var );
     }
 
-    return $self->render_json( { $method => $ret } );
+    return $self->render_json( { $method => { $var => $ret } } );
 } => 'redis';
 
 app->start;
