@@ -17,14 +17,14 @@ has acl => (
 
 has server => (
     is => 'rw',
-    isa => 'Object',
+    isa => 'ReRe::Server',
     predicate => 'has_server',
 );
 
 sub start {
     my $self = shift;
     $self->acl->process;
-    $self->server(ReRe::Server->new) unless $self->has_server;
+    $self->server(ReRe::Server->new);
 }
 
 
