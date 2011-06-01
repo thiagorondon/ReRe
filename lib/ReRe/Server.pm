@@ -7,13 +7,13 @@ use Redis;
 has server => (
     is => 'rw',
     isa => 'Str',
-    required => 1
+    default => '127.0.0.1'
 );
 
 has port => (
     is => 'rw',
     isa => 'Int',
-    required => 1
+    default => '6379'
 );
 
 has conn => (
