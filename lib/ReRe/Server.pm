@@ -27,6 +27,11 @@ has conn => (
     }
 );
 
+sub has_method {
+    my ($self, $method) = @_;
+    return $self->conn->can($method);
+}
+
 sub execute {
     my $self = shift;
     my $method = shift;
