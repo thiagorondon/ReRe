@@ -3,12 +3,14 @@
 # Thiago Rondon <thiago@aware.com.br>
 #
 
+package ReRe::App;
+
 use strict;
-
-BEGIN { push( @INC, './lib' ) }
-
 use Mojolicious::Lite;
 use ReRe;
+
+# ABSTRACT: ReRe application
+# VERSION
 
 my $rere = ReRe->new;
 $rere->start;
