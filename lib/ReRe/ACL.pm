@@ -38,9 +38,9 @@ sub _setup {
         my $password = $config{users}{$username}{password};
         my $roles = $config{users}{$username}{roles};
         $self->_add_user(
-            $username => { 
-                password => $password, 
-                roles => [ split(/ /, $roles) ] 
+            $username => {
+                password => $password,
+                roles => [ split(/ /, $roles) ]
             });
     }
 
@@ -89,6 +89,4 @@ sub process {
     $self->_setup;
 }
 
-
 1;
-
