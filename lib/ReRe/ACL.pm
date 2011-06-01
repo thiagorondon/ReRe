@@ -5,6 +5,8 @@ use Moose;
 use Config::General;
 use Data::Dumper;
 
+# VERSION
+
 has file => (
     is => 'rw',
     isa => 'Str',
@@ -44,6 +46,16 @@ sub _setup {
 
 }
 
+=head1 METHODS
+
+=cut
+
+=head2 auth
+
+(username, password)
+
+=cut
+
 sub auth {
     my ($self, $username, $password) = @_;
     return 0 unless $username and $password;
@@ -52,6 +64,12 @@ sub auth {
     return $mem_password eq $password ? 1 : 0;
 }
 
+=head2 has_role
+
+(username, role)
+
+=cut
+
 sub has_role {
     my ($self, $username, $role) = @_;
     return 0 unless $role;
@@ -59,6 +77,12 @@ sub has_role {
     my @roles = @{$user->{roles}};
     return grep(/$role|all/, @roles) ? 1 : 0;
 }
+
+=head2 process
+
+Initial process for acl.
+
+=cut
 
 sub process {
     my $self = shift;

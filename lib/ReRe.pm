@@ -21,6 +21,14 @@ has server => (
     predicate => 'has_server',
 );
 
+=head1 METHODS
+
+=head2 start
+
+Start masterplan.
+
+=cut
+
 sub start {
     my $self = shift;
     $self->acl->process;
