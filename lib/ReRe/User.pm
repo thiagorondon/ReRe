@@ -40,8 +40,8 @@ sub _setup {
         my $allow = $config{users}{$username}{allow};
         $self->_add_user(
             $username => {
-                password => $password,
-                allow => [ split(/ /, $allow) ],
+                $password ? (password => $password) : (),
+                $allow ? (allow => [ split(/ /, $allow) ]) : (),
                 roles => [ split(/ /, $roles) ]
             });
     }
@@ -52,13 +52,15 @@ sub _setup {
 
 =cut
 
-=head2 authentication
+=head2 auth
+
+Authentication
 
 (username, password)
 
 =cut
 
-sub authentication {
+sub auth {
     my ($self, $username, $password) = @_;
     return 0 unless $username and $password;
     my $user = $self->_find_user($username) or return 0;
@@ -78,8 +80,9 @@ sub has_role {
     my ($self, $username, $role, $ip) = @_;
     return 0 unless $role;
     my $user = $self->_find_user($username) or return 0;
-    my @roles = @{$user->{roles}};
-    my @allow = @{$user->{allow}};
+    my (@roles, @allow);
+    @roles = @{$user->{roles}} if defined($user->{roles});
+    @allow = @{$user->{allow}} if defined($user->{allow});
     return grep(/$role|all/, @roles) or grep(/$ip|all/, @allow) ? 1 : 0;
 }
 
