@@ -52,8 +52,8 @@ Wrapper for L<Redis>.
 
 sub execute {
     my $self = shift;
-    my $method = shift;
-    $self->conn->$method(@_);
+    my $method = shift or return '';
+    return @_ ? $self->conn->$method(@_) : $self->conn->$method;
 }
 
 1;

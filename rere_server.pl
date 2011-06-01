@@ -31,7 +31,7 @@ get '/logout' => sub {
     $self->render_json( { logout => 1 } );
 } => 'logout';
 
-get '/redis/:method/:var/:value' => { value => '' } => sub {
+get '/redis/:method/:var/:value' => { var => '', value => '' } => sub {
     my $self   = shift;
     my $method = $self->stash('method');
     my $var    = $self->stash('var');
@@ -49,12 +49,17 @@ get '/redis/:method/:var/:value' => { value => '' } => sub {
     my $ret;
     if ( $method eq 'set' ) {
         $ret = $rere->server->execute( $method, $var => $value );
-    }
-    elsif ( $method eq 'get' ) {
+        return $self->render_json( { $method => { $var => $value } } );
+   }
+    elsif ( $var ) {
         $ret = $rere->server->execute( $method, $var );
+        return $self->render_json( { $method => { $var => $ret } } );
+    }
+    else {
+        $ret = $rere->server->execute( $method );
+        return $self->render_json( { $method => $ret } );
     }
 
-    return $self->render_json( { $method => { $var => $ret } } );
 } => 'redis';
 
 app->start;
