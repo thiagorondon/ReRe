@@ -44,6 +44,14 @@ sub _setup {
 
 }
 
+sub auth {
+    my ($self, $username, $password) = @_;
+    return 0 unless $username and $password;
+    my $user = $self->_find_user($username) or return 0;
+    my $mem_password = $user->{password};
+    return $mem_password eq $password ? 1 : 0;
+}
+
 sub has_role {
     my ($self, $username, $role) = @_;
     return 0 unless $role;
