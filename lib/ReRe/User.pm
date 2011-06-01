@@ -1,5 +1,5 @@
 
-package ReRe::ACL;
+package ReRe::User;
 
 use Moose;
 use Config::General;
@@ -37,9 +37,11 @@ sub _setup {
     foreach my $username (keys $config{users}) {
         my $password = $config{users}{$username}{password};
         my $roles = $config{users}{$username}{roles};
+        my $allow = $config{users}{$username}{allow};
         $self->_add_user(
             $username => {
                 password => $password,
+                allow => [ split(/ /, $allow) ],
                 roles => [ split(/ /, $roles) ]
             });
     }
@@ -50,13 +52,13 @@ sub _setup {
 
 =cut
 
-=head2 auth
+=head2 authentication
 
 (username, password)
 
 =cut
 
-sub auth {
+sub authentication {
     my ($self, $username, $password) = @_;
     return 0 unless $username and $password;
     my $user = $self->_find_user($username) or return 0;
@@ -66,16 +68,19 @@ sub auth {
 
 =head2 has_role
 
+Autorization
+
 (username, role)
 
 =cut
 
 sub has_role {
-    my ($self, $username, $role) = @_;
+    my ($self, $username, $role, $ip) = @_;
     return 0 unless $role;
     my $user = $self->_find_user($username) or return 0;
     my @roles = @{$user->{roles}};
-    return grep(/$role|all/, @roles) ? 1 : 0;
+    my @allow = @{$user->{allow}};
+    return grep(/$role|all/, @roles) or grep(/$ip|all/, @allow) ? 1 : 0;
 }
 
 =head2 process
