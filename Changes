@@ -1,3 +1,9 @@
+* 0.004 (01/06/2001)
+Fix config file in lib/ReRe.pm
+
+* 0.003 (01/06/2011)
+Alert to config file (/etc/rere/users.conf).
+
 * 0.002 (01/06/2011)
 HTTP Basic Auth security
 

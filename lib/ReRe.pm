@@ -12,7 +12,7 @@ has user => (
     is => 'ro',
     isa => 'ReRe::User',
     lazy => 1,
-    default => sub { ReRe::User->new( { file => 'etc/users.conf' }) }
+    default => sub { ReRe::User->new( { file => '/etc/rere/users.conf' }) }
 );
 
 has server => (
