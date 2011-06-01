@@ -3,6 +3,7 @@ package ReRe;
 
 use Moose;
 use ReRe::ACL;
+use ReRe::Server;
 
 # ABSTRACT: Simple Redis Rest Interface
 # VERSION
@@ -14,9 +15,16 @@ has acl => (
     default => sub { ReRe::ACL->new( { file => 'etc/users.conf' }) }
 );
 
+has server => (
+    is => 'rw',
+    isa => 'Object',
+    predicate => 'has_server',
+);
+
 sub start {
     my $self = shift;
     $self->acl->process;
+    $self->server(ReRe::Server->new) unless $self->has_server;
 }
 
 
