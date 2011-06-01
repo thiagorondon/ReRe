@@ -39,8 +39,8 @@ get '/redis/:method/:var/:value' => { value => '' } => sub {
 
     my $username = $self->session('name') || '';
 
-    return $self->render_json( { err => 'no_method' } )
-      unless $rere->server->has_method($method);
+#    return $self->render_json( { err => 'no_method' } )
+#      unless $rere->server->has_method($method);
 
     return $self->render_json( { err => 'no_permission' } )
       unless $rere->user->has_role( $username, $method,
