@@ -22,10 +22,16 @@ has conn => (
     lazy => 1,
     default => sub { 
         my $self = shift;
-        my $host = join(/:/, $self->server, $self->port);
+        my $host = join(':', $self->server, $self->port);
         return Redis->new(server => $host);
     }
 );
+
+sub execute {
+    my $self = shift;
+    my $method = shift;
+    $self->conn->$method(@_);
+}
 
 1;
 
