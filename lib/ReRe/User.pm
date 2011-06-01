@@ -90,9 +90,10 @@ sub _ip_has_role {
     my ( $self, $role, $ip ) = @_;
     my %users = $self->_all_users;
     foreach my $user ( keys %users ) {
-        my @allow;
+        my ( @roles, @allow );
         @allow = @{ $users{$user}{allow} } if defined( $users{$user}{allow} );
-        return 1 if grep( /$ip|all/, @allow );
+        @roles = @{ $users{$user}{roles} } if defined( $users{$user}{roles} );
+        return 1 if grep( /$ip|all/, @allow ) and grep( /$role|all/, @roles );
     }
     return 0;
 }
