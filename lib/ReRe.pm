@@ -27,9 +27,4 @@ sub start {
     $self->server(ReRe::Server->new);
 }
 
-
 1;
-
-
-
-
