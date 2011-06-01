@@ -3,6 +3,8 @@
 # Thiago Rondon <thiago@aware.com.br>
 #
 
+use strict;
+
 BEGIN { push( @INC, './lib' ) }
 
 use Mojolicious::Lite;
