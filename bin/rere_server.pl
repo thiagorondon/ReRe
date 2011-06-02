@@ -48,12 +48,13 @@ get '/logout' => sub {
     $self->render_json( { logout => 1 } );
 } => 'logout';
 
-get '/redis/:method/:var/:value' => { var => '', value => '' } => sub {
+any '/redis/:method/:var/:value/:extra' => { var => '', value => '', extra =>
+''} => sub {
     my $self   = shift;
-    my $method = $self->stash('method');
-    my $var    = $self->stash('var');
-    my $value  = $self->stash('value');
-
+    my $method = $self->stash('method') || $self->param('method');
+    my $var    = $self->stash('var') || $self->param('var');
+    my $value  = $self->stash('value') || $self->param('value');
+    my $extra = $self->stash('extra') || $self->param('extra');
     my $username = $self->session('name') || '';
 
 #    return $self->render_json( { err => 'no_method' } )
@@ -75,7 +76,15 @@ get '/redis/:method/:var/:value' => { var => '', value => '' } => sub {
     if ( $method eq 'set' ) {
         $ret = $rere->server->execute( $method, $var => $value );
         return $self->render_json( { $method => { $var => $value } } );
-   }
+    }
+    elsif ( $extra ) {
+        my @ret = ( $rere->server->execute( $method, $var, $value, $extra ) );
+        return $self->render_json( { $method => [ @ret ] } );
+    }
+    elsif ( $value ) {
+        $ret = $rere->server->execute( $method, $var, $value );
+        return $self->render_json( { $method => { $var => $value } } );
+    }
     elsif ( $var ) {
         $ret = $rere->server->execute( $method, $var );
         return $self->render_json( { $method => { $var => $ret } } );
