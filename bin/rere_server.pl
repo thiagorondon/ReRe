@@ -26,7 +26,7 @@ sub error_config_users {
 
 sub error_server_ping {
     print "I can't connect to redis server.\n";
-    print "Pleasse, see http://www.rere.com.br for more information.\n";
+    print "Please, see http://www.rere.com.br for more information.\n";
     exit -2;
 }
 
