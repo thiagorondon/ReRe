@@ -2,8 +2,7 @@
 package ReRe::User;
 
 use Moose;
-use Config::General;
-use Data::Dumper;
+use ReRe::Config;
 
 # VERSION
 
@@ -27,9 +26,8 @@ has _users => (
 
 sub _parse_config {
     my $self = shift;
-    die "Where is config file for acl ?" unless -r $self->file;
-    my $conf = new Config::General( $self->file );
-    return $conf->getall;
+    my $config = ReRe::Config->new( { file => $self->file } );
+    return $config->parse;
 }
 
 sub _setup {

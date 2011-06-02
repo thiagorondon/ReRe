@@ -53,7 +53,12 @@ Start ReRe.
 sub start {
     my $self = shift;
     $self->user->process;
-    $self->server(ReRe::Server->new);
+    my $config_server = '/etc/rere/server.conf';
+    if (-r $config_server) {
+        $self->server(ReRe::Server->new({ file => $config_server }));
+    } else {
+        $self->server(ReRe::Server->new);
+    }
 }
 
 1;
