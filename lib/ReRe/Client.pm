@@ -43,7 +43,7 @@ sub get_rere {
     my $password = $self->password;
 
     my $userpass = $username && $password ? "$username:$password\@" : '';
-    my $base_url = "http://$userpass" . 
+    my $base_url = "http://$userpass" .
         join('/', $self->url, 'redis', $method, $var);
 
     $base_url .= '/' . $value if $value;
