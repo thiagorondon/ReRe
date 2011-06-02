@@ -1,3 +1,7 @@
+* 0.006 (02/06/2011)
+Support for lists.
+Check if redis is up, when start rere_server.pl
+
 * 0.005 (02/06/2011)
 Add server.conf
 

@@ -8,6 +8,7 @@ package ReRe::App;
 use strict;
 use Mojolicious::Lite;
 use ReRe;
+use Try::Tiny;
 
 # ABSTRACT: ReRe application
 # VERSION
@@ -19,14 +20,26 @@ my $rere = ReRe->new;
 
 sub error_config_users {
     print "I don't find $config_users.\n";
-    print "Please, see http://www.rere.com.br to how create this file\n";
+    print "Please, see http://www.rere.com.br to how create this file.\n";
     exit -1;
+}
+
+sub error_server_ping {
+    print "I can't connect to redis server.\n";
+    print "Pleasse, see http://www.rere.com.br for more information.\n";
+    exit -2;
 }
 
 sub main {
     my $self = shift;
     &error_config_users unless -r $config_users;
     $rere->start;
+    try {
+        $rere->server->execute('ping');
+    } catch {
+        &error_server_ping;
+    };
+
     app->start;
 }
 
