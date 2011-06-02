@@ -12,6 +12,16 @@ has file => (
     required => 1
 );
 
+=head1 METHOD
+
+=cut
+
+=head2 parse
+
+Parse config file with L<Config::General>.
+
+=cut
+
 sub parse {
     my $self = shift;
     my $file = $self->file;

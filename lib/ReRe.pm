@@ -23,7 +23,7 @@ has server => (
 
 =head1 DESCRIPTION
 
-ReRe is a simple redis rest interface write in Perl and L<Mojolicious</a>,
+ReRe is a simple redis rest interface write in Perl and L<Mojolicious>,
 with some features like:
 
 =over
