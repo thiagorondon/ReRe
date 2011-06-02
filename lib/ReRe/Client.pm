@@ -8,6 +8,8 @@ use Data::Dumper;
 # WARNING !!!! WARNING !!!! WARNING !!!!
 # PLEASE, DON'T USE THIS !!!!!!
 
+# VERSION
+
 has url => (
     is => 'rw',
     isa => 'Str',
@@ -33,7 +35,7 @@ has ua => (
     default => sub { Mojo::UserAgent->new }
 );
 
-sub get_rere {
+sub _get_rere {
     my $self = shift;
     my $method = shift;
     my $var = shift;
@@ -47,20 +49,32 @@ sub get_rere {
         join('/', $self->url, 'redis', $method, $var);
 
     $base_url .= '/' . $value if $value;
-    
+
     my $json = $self->ua->get($base_url)->res->json;
     return $json;
 }
 
+=head1 METHODS
+
+=cut
+
+=head2 get
+
+=cut
+
 sub get {
     my ($self, $var) = @_;
-    my $json = $self->get_rere('get', $var);
+    my $json = $self->_get_rere('get', $var);
     return $json->{get}{$var};
 }
 
+=head2 set
+
+=cut
+
 sub set {
     my ($self, $var, $value) = @_;
-    my $json = $self->get_rere('set', $var, $value);
+    my $json = $self->_get_rere('set', $var, $value);
     return $json->{set}{$var};
 }
 

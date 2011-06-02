@@ -1,6 +1,7 @@
 * 0.006 (02/06/2011)
 Support for lists.
 Check if redis is up, when start rere_server.pl
+Support for GET and POST.
 
 * 0.005 (02/06/2011)
 Add server.conf
