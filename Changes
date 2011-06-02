@@ -1,3 +1,6 @@
+* 0.007 (02/06/2011)
+CIDR Authentication.
+
 * 0.006 (02/06/2011)
 Support for lists.
 Check if redis is up, when start rere_server.pl

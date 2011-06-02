@@ -1,5 +1,5 @@
 
-use Test::More tests => 11;
+use Test::More tests => 13;
 
 use FindBin qw($Bin);
 my $usersconf = join('/', $Bin, 'etc', 'users.conf');
@@ -23,4 +23,7 @@ ok(!$acl->auth('userrw', 'error'));
 
 ok($acl->has_role('', 'get', '127.0.0.1'));
 ok(!$acl->has_role('', 'set', '127.0.0.3'));
+
+ok($acl->has_role('', 'get', '192.168.0.12'));
+ok(!$acl->has_role('', 'get', '192.168.1.12'));
 

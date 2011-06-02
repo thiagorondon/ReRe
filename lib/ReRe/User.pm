@@ -3,6 +3,7 @@ package ReRe::User;
 
 use Moose;
 use ReRe::Config;
+use Net::CIDR::Lite;
 
 # VERSION
 
@@ -40,12 +41,28 @@ sub _setup {
         $self->_add_user(
             $username => {
                 $password ? ( password => $password ) : (),
-                $allow ? ( allow => [ split(' ' , $allow ) ] ) : (),
-                roles => [ split(' ', $roles ) ]
+                $allow ? ( allow => [ split( ' ', $allow ) ] ) : (),
+                roles => [ split( ' ', $roles ) ]
             }
         );
     }
 
+}
+
+sub _check_cidr {
+    my $self  = shift;
+    my $ip    = shift;
+    my @allow = @_;
+
+    foreach my $network (@allow) {
+        my $cidr = Net::CIDR::Lite->new;
+        my $flag = 0;
+        eval {
+            $cidr->add($network);
+            $flag++ if $cidr->find($ip);
+        };
+        return 1 if $flag;
+    }
 }
 
 =head1 METHODS
@@ -85,6 +102,7 @@ sub auth_ip {
         @allow = @{ $users{$user}{allow} } if defined( $users{$user}{allow} );
         @roles = @{ $users{$user}{roles} } if defined( $users{$user}{roles} );
         return $user if grep( /$ip|all/, @allow );
+        return $user if $self->_check_cidr( $ip, @allow );
     }
     return 0;
 }
@@ -113,6 +131,7 @@ sub _ip_has_role {
         @allow = @{ $users{$user}{allow} } if defined( $users{$user}{allow} );
         @roles = @{ $users{$user}{roles} } if defined( $users{$user}{roles} );
         return 1 if grep( /$ip|all/, @allow ) and grep( /$role|all/, @roles );
+        return 1 if $self->_check_cidr( $ip, @allow );
     }
     return 0;
 }
