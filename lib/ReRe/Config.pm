@@ -12,6 +12,40 @@ has file => (
     required => 1
 );
 
+=head1 SYNOPSIS
+
+=head2 users.conf
+
+    <users>
+        <userro>
+            password userro
+            roles get
+        </userro>
+
+        <userrw>
+            password userrw
+            roles get set info del
+        </userrw>
+
+        <userall>
+            allow 127.0.0.1
+            password userall
+            roles all
+        </userall>
+
+        <usernet>
+            allow 192.168.0.0/24
+            roles all
+        </usernet>
+    </users>
+
+=head2 server.conf
+
+    <server>
+        host 127.0.0.1
+        port 6379
+    </server>
+
 =head1 METHOD
 
 =cut
