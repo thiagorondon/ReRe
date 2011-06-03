@@ -5,10 +5,16 @@ use Moose;
 use Mojo::UserAgent;
 use Data::Dumper;
 
-# WARNING !!!! WARNING !!!! WARNING !!!!
-# PLEASE, DON'T USE THIS !!!!!!
-
 # VERSION
+
+=head1 DESCRIPTION
+
+This documentation lists commands which are exercised in test suite,
+but additinal commands will work correctly since protocol specifies
+enough information to support almost all commands with same peace of
+code with a little help of C <AUTOLOAD> .
+
+=cut
 
 our $AUTOLOAD;
 
