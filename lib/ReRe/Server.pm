@@ -48,19 +48,6 @@ has conn => (
 
 =head1 METHODS
 
-=cut
-
-=head2 has_method
-
-Check if method is available in L<Redis>.
-
-=cut
-
-sub has_method {
-    my ( $self, $method ) = @_;
-    return $self->conn->can($method);
-}
-
 =head2 execute
 
 Wrapper for L<Redis>.

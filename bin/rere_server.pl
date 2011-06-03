@@ -17,11 +17,10 @@ use Mojo::JSON;
 
 plugin 'basic_auth';
 
-my $config_users = -r '/etc/rere/users.conf' ? '/etc/rere/users.conf' : 'etc/users.conf';
 my $rere         = ReRe->new;
 
 sub error_config_users {
-    say "I don't find $config_users.";
+    say "I don't find /etc/rere/users.conf";
     say "Please, see http://www.rere.com.br to how create this file.";
     exit -1;
 }
@@ -34,7 +33,7 @@ sub error_server_ping {
 
 sub main {
     my $self = shift;
-    &error_config_users unless -r $config_users;
+    &error_config_users unless -r $rere->config_user();
     $rere->start;
     try {
         $rere->server->execute('ping');

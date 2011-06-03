@@ -8,13 +8,17 @@ use ReRe::Server;
 # ABSTRACT: Simple Redis Rest Interface
 # VERSION
 
-my $config_users = -r '/etc/rere/users.conf' ? '/etc/rere/users.conf' : 'etc/users.conf';
+has config_user => (
+    is => 'rw',
+    isa => 'Str',
+    default => sub { -r '/etc/rere/users.conf' ? '/etc/rere/users.conf' : 'etc/users.conf' }
+);
 
 has user => (
     is => 'ro',
     isa => 'ReRe::User',
     lazy => 1,
-    default => sub { ReRe::User->new( { file => $config_users }) }
+    default => sub { ReRe::User->new( { file => shift->config_user }) }
 );
 
 has server => (
@@ -66,15 +70,12 @@ sub start {
 
 =head2 process
 
-Process
+Process the request to redis server.
 
 =cut
 
 sub process {
     my ($self, $method, $var, $value, $extra, $username) = @_;
-
-#    return $self->render_json( { err => 'no_method' } )
-#      unless $rere->server->has_method($method);
 
     return { err => 'no_permission' }
       unless $self->user->has_role( $username, $method );
@@ -97,6 +98,39 @@ sub process {
     }
     return { $method => $ret };
 }
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+perldoc ReRe
+perldoc ReRe::Config
+perldoc ReRe::Server
+perldoc ReRe::User
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=ReRe>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/ReRe>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/ReRe>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/ReRe>
+
+=back
+
+=cut 
 
 1;
 
