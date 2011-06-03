@@ -9,24 +9,26 @@ use strict;
 use Mojolicious::Lite;
 use ReRe;
 use Try::Tiny;
+use feature ":5.10";
+use Mojo::JSON;
 
 # ABSTRACT: ReRe application
 # VERSION
 
 plugin 'basic_auth';
 
-my $config_users = '/etc/rere/users.conf';
-my $rere = ReRe->new;
+my $config_users = -r '/etc/rere/users.conf' ? '/etc/rere/users.conf' : 'etc/users.conf';
+my $rere         = ReRe->new;
 
 sub error_config_users {
-    print "I don't find $config_users.\n";
-    print "Please, see http://www.rere.com.br to how create this file.\n";
+    say "I don't find $config_users.";
+    say "Please, see http://www.rere.com.br to how create this file.";
     exit -1;
 }
 
 sub error_server_ping {
-    print "I can't connect to redis server.\n";
-    print "Please, see http://www.rere.com.br for more information.\n";
+    say "I can't connect to redis server.";
+    say "Please, see http://www.rere.com.br for more information.";
     exit -2;
 }
 
@@ -36,7 +38,8 @@ sub main {
     $rere->start;
     try {
         $rere->server->execute('ping');
-    } catch {
+    }
+    catch {
         &error_server_ping;
     };
 
@@ -61,52 +64,68 @@ get '/logout' => sub {
     $self->render_json( { logout => 1 } );
 } => 'logout';
 
-any '/redis/:method/:var/:value/:extra' => { var => '', value => '', extra =>
-''} => sub {
-    my $self   = shift;
-    my $method = $self->stash('method') || $self->param('method');
-    my $var    = $self->stash('var') || $self->param('var');
-    my $value  = $self->stash('value') || $self->param('value');
-    my $extra = $self->stash('extra') || $self->param('extra');
+any '/redis/:method/:var/:value/:extra' => {
+    var   => '',
+    value => '',
+    extra => ''
+  } => sub {
+    my $self     = shift;
+    my $method   = $self->stash('method') || $self->param('method');
+    my $var      = $self->stash('var') || $self->param('var');
+    my $value    = $self->stash('value') || $self->param('value');
+    my $extra    = $self->stash('extra') || $self->param('extra');
     my $username = $self->session('name') || '';
 
-#    return $self->render_json( { err => 'no_method' } )
-#      unless $rere->server->has_method($method);
-
     $username = $rere->user->auth_ip( $self->tx->remote_address )
-        unless $username;
+      unless $username;
 
     return $self->render_json( { err => 'no_auth' } )
-        unless $username or $self->basic_auth( realm => sub {
-                my ($http_username, $http_password) = @_;
-                $rere->user->auth( $http_username, $http_password);
-            } );
+      unless $username
+          or $self->basic_auth(
+              realm => sub {
+                  my ( $http_username, $http_password ) = @_;
+                  $rere->user->auth( $http_username, $http_password );
+              }
+          );
 
-    return $self->render_json( { err => 'no_permission' } )
-      unless $rere->user->has_role( $username, $method );
+    $self->render_json(
+        $rere->process( $method, $var, $value, $extra, $username ) );
 
-    my $ret;
-    if ( $method eq 'set' ) {
-        $ret = $rere->server->execute( $method, $var => $value );
-        return $self->render_json( { $method => { $var => $value } } );
-    }
-    elsif ( $extra ) {
-        my @ret = ( $rere->server->execute( $method, $var, $value, $extra ) );
-        return $self->render_json( { $method => [ @ret ] } );
-    }
-    elsif ( $value ) {
-        $ret = $rere->server->execute( $method, $var, $value );
-        return $self->render_json( { $method => { $var => $value } } );
-    }
-    elsif ( $var ) {
-        $ret = $rere->server->execute( $method, $var );
-        return $self->render_json( { $method => { $var => $ret } } );
-    }
-    else {
-        $ret = $rere->server->execute( $method );
-        return $self->render_json( { $method => $ret } );
-    }
+  } => 'redis';
 
-} => 'redis';
+websocket '/ws' => sub {
+    my $self = shift;
+
+    warn 'ws';
+    my $username = 'userrw';
+
+#    my $username = $rere->user->auth_ip( $self->tx->remote_address );
+#
+#    return $self->render_json( { err => 'no_auth' } )
+#      unless $username
+#          or $self->basic_auth(
+#              realm => sub {
+#                  my ( $http_username, $http_password ) = @_;
+#                  $rere->user->auth( $http_username, $http_password );
+#              }
+#          );
+    app->log->debug(sprintf 'Client connected: %s', $self->tx->remote_address);
+
+    $self->on_message(
+        sub {
+            my ( $self, $message ) = @_;
+            warn $message;
+            my ( $method, $var, $value, $extra ) = split( ' ', $message );
+            $self->send_message(
+                $self->render_json(
+                    $rere->process( $method, $var, $value, $extra, $username )
+                )
+            );
+        }
+    );
+
+};
+
+get '/' => 'index';
 
 main;

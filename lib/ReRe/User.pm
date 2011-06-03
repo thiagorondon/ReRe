@@ -34,6 +34,7 @@ sub _parse_config {
 sub _setup {
     my $self   = shift;
     my %config = $self->_parse_config;
+    return 0 unless defined($config{users});
     foreach my $username ( keys $config{users} ) {
         my $password = $config{users}{$username}{password};
         my $roles    = $config{users}{$username}{roles};
