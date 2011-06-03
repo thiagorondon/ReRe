@@ -126,6 +126,9 @@ websocket '/ws' => sub {
 
 };
 
-get '/' => 'index';
+any '/' => sub {
+    my $self = shift;
+    return $self->render_json( {} );
+} => 'index';
 
 main;
