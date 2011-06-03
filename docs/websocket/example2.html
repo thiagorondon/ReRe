@@ -1,0 +1,49 @@
+
+<html>
+<head>
+	<title>WebSocket Client</title>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+	<script type="text/javascript">
+	$(function () {
+		$('#msg').focus();
+
+		var log = function (text) {
+	    		$('#log').val( $('#log').val() + text + "\n");
+      		};
+
+		var ws = new WebSocket('ws://localhost:3000/ws');
+      		ws.onopen = function () {
+              		log('Connection opened');
+		};
+		
+		ws.send('info');
+
+		ws.onmessage = function (msg) {
+		        var res = JSON.parse(msg.data);
+			log('[' + res.hms + '] ' + res.text); 
+		};
+
+		$('#msg').keydown(function (e) {
+			if (e.keyCode == 13 && $('#msg').val()) {
+				ws.send('info');
+				$('#msg').val('');
+			}
+		});
+	});
+	</script>
+
+	<style type="text/css">
+		textarea {
+			width: 40em;
+			height:10em;
+		}
+	</style>
+</head>
+<body>
+
+<p><input type="text" id="msg" /></p>
+<textarea id="log" readonly></textarea>
+
+</body>
+</html>
+
