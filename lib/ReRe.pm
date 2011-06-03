@@ -82,22 +82,19 @@ sub process {
     my $ret;
     if ( $method eq 'set' ) {
         $ret = $self->server->execute( $method, $var => $value );
-        return { $method => { $var => $value } };
     }
     elsif ( $extra ) {
-        my @ret = ( $self->server->execute( $method, $var, $value, $extra ) );
-        return { $method => [ @ret ] };
+        $ret = ( $self->server->execute( $method, $var, $value, $extra ) );
     }
     elsif ( $value ) {
         $ret = $self->server->execute( $method, $var, $value );
-        return { $method => { $var => $value } };
     }
     elsif ( $var ) {
         $ret = $self->server->execute( $method, $var );
-        return { $method => { $var => $ret } };
     }
-
-    $ret = $self->server->execute( $method );
+    else {
+        $ret = $self->server->execute( $method );
+    }
     return { $method => $ret };
 }
 

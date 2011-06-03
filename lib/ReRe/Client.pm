@@ -10,6 +10,18 @@ use Data::Dumper;
 
 # VERSION
 
+our $AUTOLOAD;
+
+sub DESTROY { }
+
+sub AUTOLOAD {
+    my $self = shift;
+    my $command = $AUTOLOAD;
+    $command =~ s/.*://;
+    my @args = @_;
+    $self->_get_rere($command, @args);
+}
+
 has url => (
     is => 'rw',
     isa => 'Str',
@@ -51,33 +63,14 @@ sub _get_rere {
     $base_url .= '/' . $value if $value;
 
     my $json = $self->ua->get($base_url)->res->json;
-    return $json;
+    return $json->{$method};
 }
 
 =head1 METHODS
 
-=cut
-
-=head2 get
+The same of L<Redis>.
 
 =cut
-
-sub get {
-    my ($self, $var) = @_;
-    my $json = $self->_get_rere('get', $var);
-    return $json->{get}{$var};
-}
-
-=head2 set
-
-=cut
-
-sub set {
-    my ($self, $var, $value) = @_;
-    my $json = $self->_get_rere('set', $var, $value);
-    return $json->{set}{$var};
-}
-
 
 1;
 
