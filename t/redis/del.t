@@ -10,7 +10,7 @@ use Test::More tests => 7;
 use Test::Mojo;
 
 use FindBin;
-require "$FindBin::Bin/../bin/rere_server.pl";
+require "$FindBin::Bin/../../bin/rere_server.pl";
 
 my $t = Test::Mojo->new;
 $t->get_ok('/redis/set/foo/1')->status_is(200);

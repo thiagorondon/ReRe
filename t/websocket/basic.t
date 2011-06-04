@@ -10,7 +10,7 @@ use Test::More tests => 3;
 use Test::Mojo;
 use Mojo::IOLoop;
 use FindBin;
-require "$FindBin::Bin/../bin/rere_server.pl";
+require "$FindBin::Bin/../../bin/rere_server.pl";
 
 my $t = Test::Mojo->new;
 
@@ -36,4 +36,5 @@ $ua->websocket(
 );
 $loop->start;
 ok $result;
+
 

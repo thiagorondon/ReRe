@@ -10,7 +10,7 @@ use Test::More tests => 11;
 use Test::Mojo;
 
 use FindBin;
-require "$FindBin::Bin/../bin/rere_server.pl";
+require "$FindBin::Bin/../../bin/rere_server.pl";
 
 my $t = Test::Mojo->new;
 
