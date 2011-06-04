@@ -120,6 +120,7 @@ websocket '/ws' => sub {
                     $rere->process( $method, $var, $value, $extra, $username )
                 )
             );
+            $self->finish;
         }
     );
 
