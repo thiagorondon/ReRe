@@ -52,7 +52,7 @@ has ua => (
 
 sub _get_rere {
     my ($self, $method, $var, $value, $extra) = @_;
-    
+
     my $username = $self->username;
     my $password = $self->password;
 

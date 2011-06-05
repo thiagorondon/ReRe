@@ -116,7 +116,7 @@ websocket '/ws' => sub {
             my ( $method, $var, $value, $extra ) = split( ' ', $message );
             my $ret = $rere->process( $method, $var, $value, $extra, $username );
             $self->send_message(
-                defined($ret->{$method}) ? $ret->{$method} : 
+                defined($ret->{$method}) ? $ret->{$method} :
                     ( defined($ret->{err}) ? $ret->{err} : () )
             );
             $self->finish;

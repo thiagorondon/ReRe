@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 3;
+use Test::More tests => 5;
 use Test::Mojo;
 use Mojo::IOLoop;
 use Data::Dumper;
