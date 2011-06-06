@@ -43,7 +43,7 @@ has conn => (
     is      => 'rw',
     isa     => 'Object',
     lazy    => 1,
-    builder => '_build_conn'
+    builder => '_builder_conn'
 );
 
 has hooks => (
