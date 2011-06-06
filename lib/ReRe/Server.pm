@@ -43,11 +43,7 @@ has conn => (
     is      => 'rw',
     isa     => 'Object',
     lazy    => 1,
-    default => sub {
-        my $self = shift;
-        my $host = join( ':', $self->host, $self->port );
-        return Redis->new( server => $host );
-    }
+    builder => '_build_conn'
 );
 
 has hooks => (
@@ -60,6 +56,12 @@ has hooks => (
         add_hook  => 'push'
     }
 );
+
+sub _builder_conn {
+    my $self = shift;
+    my $host = join( ':', $self->host, $self->port );
+    return Redis->new( server => $host );
+}
 
 =head1 METHODS
 
