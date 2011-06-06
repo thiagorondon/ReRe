@@ -14,8 +14,8 @@ sub _hook {
     if ( scalar( @{$args} ) ) {
         warn Dumper($args);
     }
-
     #self->conn->execute('info');
+    return 0;
 }
 
 1;
