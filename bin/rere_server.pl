@@ -18,7 +18,7 @@ use Data::Dumper;
 
 plugin 'basic_auth';
 
-my $rere         = ReRe->new;
+my $rere = ReRe->new;
 
 sub error_config_users {
     say "I don't find /etc/rere/users.conf";
@@ -34,7 +34,7 @@ sub error_server_ping {
 
 sub main {
     my $self = shift;
-    &error_config_users unless -r $rere->config_user();
+    &error_config_users unless -r $rere->config_users();
     $rere->start;
     try {
         $rere->server->execute('ping');
@@ -93,37 +93,43 @@ any '/redis/:method/:var/:value/:extra' => {
 
   } => 'redis';
 
-websocket '/ws' => sub {
-    my $self = shift;
+if ( $rere->websocket->active ) {
 
-    my $username = 'userrw';
+    websocket '/ws' => sub {
+        my $self = shift;
 
-#    my $username = $rere->user->auth_ip( $self->tx->remote_address );
-#
-#    return $self->render_json( { err => 'no_auth' } )
-#      unless $username
-#          or $self->basic_auth(
-#              realm => sub {
-#                  my ( $http_username, $http_password ) = @_;
-#                  $rere->user->auth( $http_username, $http_password );
-#              }
-#          );
-    app->log->debug(sprintf 'Client connected: %s', $self->tx->remote_address);
+        my $username = 'userrw';
 
-    $self->on_message(
-        sub {
-            my ( $self, $message ) = @_;
-            my ( $method, $var, $value, $extra ) = split( ' ', $message );
-            my $ret = $rere->process( $method, $var, $value, $extra, $username );
-            $self->send_message(
-                defined($ret->{$method}) ? $ret->{$method} :
-                    ( defined($ret->{err}) ? $ret->{err} : () )
-            );
-            $self->finish;
-        }
-    );
+        #    my $username = $rere->user->auth_ip( $self->tx->remote_address );
+        #
+        #    return $self->render_json( { err => 'no_auth' } )
+        #      unless $username
+        #          or $self->basic_auth(
+        #              realm => sub {
+        #                  my ( $http_username, $http_password ) = @_;
+        #                  $rere->user->auth( $http_username, $http_password );
+        #              }
+        #          );
+        app->log->debug( sprintf 'Client connected: %s',
+            $self->tx->remote_address );
 
-};
+        $self->on_message(
+            sub {
+                my ( $self, $message ) = @_;
+                my ( $method, $var, $value, $extra ) = split( ' ', $message );
+                my $ret =
+                  $rere->process( $method, $var, $value, $extra, $username );
+                $self->send_message(
+                    defined( $ret->{$method} )
+                    ? $ret->{$method}
+                    : ( defined( $ret->{err} ) ? $ret->{err} : () )
+                );
+                $self->finish;
+            }
+        );
+
+    };
+}
 
 any '/' => sub {
     my $self = shift;
