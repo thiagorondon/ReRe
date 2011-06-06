@@ -85,13 +85,15 @@ sub execute {
     my $self = shift;
     my $method = shift or return '';
     foreach my $hook ( $self->all_hooks ) {
+        my $ret;
         eval {
             my $class
                 = ReRe::Hook->with_traits( '+ReRe::Role::Hook', $hook )
                 ->new( method => $method, args => [@_], conn => $self->conn );
-            $class->process;
+            $ret = $class->process;
         };
         warn $@ if $@;
+        return $ret if $ret;
     }
     $self->conn->auth( $self->password ) if $self->has_password;
     return @_ ? $self->conn->$method(@_) : $self->conn->$method;
