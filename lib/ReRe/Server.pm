@@ -76,7 +76,7 @@ sub execute {
         eval {
             my $class =
               ReRe::Hook->with_traits( '+ReRe::Role::Hook', $hook )
-              ->new( method => $method, args => [ @_ ]  );
+              ->new( method => $method, args => [ @_ ], conn => $self->conn  );
             $class->process;
         };
         warn $@ if $@;

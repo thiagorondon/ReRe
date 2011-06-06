@@ -19,5 +19,11 @@ has args => (
     default => sub { [] }
 );
 
+has conn => (
+    is => 'rw',
+    isa => 'Object',
+    default => sub {},
+);
+
 1;
 
