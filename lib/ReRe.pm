@@ -14,6 +14,12 @@ has config_user => (
     default => sub { -r '/etc/rere/users.conf' ? '/etc/rere/users.conf' : 'etc/users.conf' }
 );
 
+has config_server => (
+    is => 'rw',
+    isa => 'Str',
+    default => sub { -r '/etc/rere/server.conf' ? '/etc/rere/server.conf' : 'etc/server.conf' }
+);
+
 has user => (
     is => 'ro',
     isa => 'ReRe::User',
@@ -59,12 +65,10 @@ Start ReRe.
 sub start {
     my $self = shift;
     $self->user->process;
-    my $config_server = '/etc/rere/server.conf';
-    if (-r $config_server) {
-        $self->server(ReRe::Server->new({ file => $config_server }));
-    } else {
-        $self->server(ReRe::Server->new);
-    }
+
+    my $instance = ReRe::Server->new;
+    $instance->file($self->config_server) if -r $self->config_server;
+    $self->server($instance);
 }
 
 
