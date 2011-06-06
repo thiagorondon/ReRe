@@ -30,4 +30,3 @@ sub process {
 no Moose;
 1;
 
-

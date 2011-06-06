@@ -15,6 +15,7 @@ sub _hook {
         warn Dumper($args);
     }
 
+    #self->conn->execute('info');
 }
 
 1;
