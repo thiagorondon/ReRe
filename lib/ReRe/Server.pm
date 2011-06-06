@@ -18,13 +18,7 @@ around 'file' => sub {
     my $self = shift;
     return $self->$orig() unless @_;
     my ($file) = shift;
-    my $config = ReRe::Config->new( { file => $file } );
-    my %parse = $config->parse;
-    $self->host( $parse{server}{host} ) if defined( $parse{server}{host} );
-    $self->port( $parse{server}{port} ) if defined( $parse{server}{port} );
-
-    map { $self->add_hook($_) } split( ' ', $parse{server}{hooks} )
-      if defined( $parse{server}{hooks} );
+    $self->_builder_file( ReRe::Config->new( { file => $file } ) );
 };
 
 has host => (
@@ -37,6 +31,13 @@ has port => (
     is      => 'rw',
     isa     => 'Int',
     default => '6379'
+);
+
+has password => (
+    is        => 'rw',
+    isa       => 'Str',
+    default   => '',
+    predicate => 'has_password'
 );
 
 has conn => (
@@ -63,6 +64,15 @@ sub _builder_conn {
     return Redis->new( server => $host );
 }
 
+sub _builder_file {
+    my ( $self, $config ) = @_;
+    my %parse = $config->parse;
+    $self->$_( $parse{server}{$_} ) for grep { defined( $parse{server}{$_} ) } qw(host port admin);
+
+    map { $self->add_hook($_) } split( ' ', $parse{server}{hooks} )
+        if defined( $parse{server}{hooks} );
+}
+
 =head1 METHODS
 
 =head2 execute
@@ -76,14 +86,14 @@ sub execute {
     my $method = shift or return '';
     foreach my $hook ( $self->all_hooks ) {
         eval {
-            my $class =
-              ReRe::Hook->with_traits( '+ReRe::Role::Hook', $hook )
-              ->new( method => $method, args => [ @_ ], conn => $self->conn  );
+            my $class
+                = ReRe::Hook->with_traits( '+ReRe::Role::Hook', $hook )
+                ->new( method => $method, args => [@_], conn => $self->conn );
             $class->process;
         };
         warn $@ if $@;
     }
-
+    $self->conn->auth( $self->password ) if $self->has_password;
     return @_ ? $self->conn->$method(@_) : $self->conn->$method;
 }
 
