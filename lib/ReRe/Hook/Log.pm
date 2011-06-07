@@ -9,10 +9,10 @@ use Data::Dumper;
 sub _hook {
     my $self = shift;
 
-    warn $self->method;
+    # warn $self->method;
     my $args = $self->args;
     if ( scalar( @{$args} ) ) {
-        warn Dumper($args);
+        # warn Dumper($args);
     }
     #self->conn->execute('info');
     return 0;
