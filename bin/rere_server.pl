@@ -77,7 +77,7 @@ any '/redis/:method/:var/:value/:extra' => {
     my $callback = $self->param('callback') || '';
 
     my $username = $self->session('name') || '';
-    
+
     $username = $rere->user->auth_ip( $self->tx->remote_address )
       unless $username;
 
@@ -92,11 +92,11 @@ any '/redis/:method/:var/:value/:extra' => {
 
     my $json = Mojo::JSON->new;
     my $output = $json->encode( $rere->process( $method, $var, $value, $extra, $username ) );
-    
+
     # JSONP
     $output = "$callback($output)" if $callback;
     $self->render_text( $output );
-  
+
   } => 'redis';
 
 if ( $rere->websocket->active ) {

@@ -96,8 +96,8 @@ sub execute {
         return $ret if $ret;
     }
     $self->conn->auth( $self->password ) if $self->has_password;
-    
-    my @args = grep { $_ } @_;
+
+    my @args = grep {!/^$/} @_;
     return @args ? $self->conn->$method(@args) : $self->conn->$method;
 }
 

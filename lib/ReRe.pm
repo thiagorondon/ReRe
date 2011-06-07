@@ -89,7 +89,7 @@ sub process {
     return { err => 'no_permission' }
       unless $self->user->has_role( $username, $method );
 
-    my $ret = ( $self->server->execute( $method, $var, $value, $extra ) );
+    my $ret = $self->server->execute( $method, $var, $value, $extra );
     return { $method => $ret };
 }
 
