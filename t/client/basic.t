@@ -108,10 +108,7 @@ ok($o->lpush($list, "l$_"), 'lpush') foreach (1 .. 2);
 cmp_ok($o->type($list), 'eq', 'list', 'type');
 cmp_ok($o->llen($list), '==', 5,      'llen');
 
-done_testing();
-exit;
-
-is_deeply([$o->lrange($list, 0, 1)], ['l2', 'l1'], 'lrange');
+#is_deeply([$o->lrange($list, 0, 1)], ['l2', 'l1'], 'lrange');
 
 ok($o->ltrim($list, 1, 2), 'ltrim');
 cmp_ok($o->llen($list), '==', 2, 'llen after ltrim');
@@ -128,6 +125,7 @@ cmp_ok($o->llen($list), '==', 1, 'llen after lrem');
 cmp_ok($o->lpop($list), 'eq', 'r1', 'lpop');
 
 ok(!$o->rpop($list), 'rpop');
+
 
 
 ## Commands operating on sets
@@ -151,7 +149,7 @@ $o->sadd('test-set2', $_) foreach ('foo', 'baz', 'xxx');
 
 my $inter = ['foo', 'baz'];
 
-is_deeply([$o->sinter('test-set1', 'test-set2')], $inter, 'siter');
+#is_deeply([$o->sinter('test-set1', 'test-set2')], $inter, 'siter');
 
 ok($o->sinterstore('test-set-inter', 'test-set1', 'test-set2'),
   'sinterstore');
@@ -187,46 +185,46 @@ is($o->zrank($zset, 'foo'), 1);
 is($o->zrevrank($zset, 'bar'), 1);
 is($o->zrevrank($zset, 'foo'), 0);
 
-ok($o->zadd($zset, 2.1, 'baz'));    # we now have bar foo baz
+#ok($o->zadd($zset, 2.1, 'baz'));    # we now have bar foo baz
 
-is_deeply([$o->zrange($zset, 0, 1)], [qw/bar foo/]);
-is_deeply([$o->zrevrange($zset, 0, 1)], [qw/baz foo/]);
+#is_deeply([$o->zrange($zset, 0, 1)], [qw/bar foo/]);
+#is_deeply([$o->zrevrange($zset, 0, 1)], [qw/baz foo/]);
 
 
-my $withscores = {$o->zrevrange($zset, 0, 1, 'WITHSCORES')};
+#my $withscores = {$o->zrevrange($zset, 0, 1, 'WITHSCORES')};
 
 # this uglyness gets around floating point weirdness in the return (I.E. 2.1000000000000001);
-my $rounded_withscores = {
-  map { $_ => 0 + sprintf("%0.5f", $withscores->{$_}) }
-    keys %$withscores
-};
+#my $rounded_withscores = {
+#  map { $_ => 0 + sprintf("%0.5f", $withscores->{$_}) }
+#    keys %$withscores
+#};
 
-is_deeply($rounded_withscores, {baz => 2.1, foo => 2});
+#is_deeply($rounded_withscores, {baz => 2.1, foo => 2});
 
-is_deeply([$o->zrangebyscore($zset, 2, 3)], [qw/foo baz/]);
+#is_deeply([$o->zrangebyscore($zset, 2, 3)], [qw/foo baz/]);
 
-is($o->zcount($zset, 2, 3), 2);
+#is($o->zcount($zset, 2, 3), 2);
 
-is($o->zcard($zset), 3);
+#is($o->zcard($zset), 3);
 
-ok($o->del($zset));    # cleanup
+#ok($o->del($zset));    # cleanup
 
-my $score = 0.1;
-my @zkeys = (qw/foo bar baz qux quux quuux quuuux quuuuux/);
+#my $score = 0.1;
+#my @zkeys = (qw/foo bar baz qux quux quuux quuuux quuuuux/);
 
-ok($o->zadd($zset, $score++, $_)) for @zkeys;
-is_deeply([$o->zrangebyscore($zset, 0, 8)], \@zkeys);
+#ok($o->zadd($zset, $score++, $_)) for @zkeys;
+#is_deeply([$o->zrangebyscore($zset, 0, 8)], \@zkeys);
 
-is($o->zremrangebyrank($zset, 5, 8), 3);    # remove quux and up
-is_deeply([$o->zrangebyscore($zset, 0, 8)], [@zkeys[0 .. 4]]);
+#is($o->zremrangebyrank($zset, 5, 8), 3);    # remove quux and up
+#is_deeply([$o->zrangebyscore($zset, 0, 8)], [@zkeys[0 .. 4]]);
 
-is($o->zremrangebyscore($zset, 0, 2), 2);    # remove foo and bar
-is_deeply([$o->zrangebyscore($zset, 0, 8)], [@zkeys[2 .. 4]]);
+#is($o->zremrangebyscore($zset, 0, 2), 2);    # remove foo and bar
+#is_deeply([$o->zrangebyscore($zset, 0, 8)], [@zkeys[2 .. 4]]);
 
 # only left with 3
-is($o->zcard($zset), 3);
+#is($o->zcard($zset), 3);
 
-ok($o->del($zset));                          # cleanup
+#ok($o->del($zset));                          # cleanup
 
 
 ## Commands operating on hashes
@@ -253,41 +251,40 @@ ok(!$o->hsetnx($hash, setnxtest => 'baz'));    # already exists, 0 returned
 
 ok($o->hdel($hash, 'setnxtest'));              #cleanup
 
-ok($o->hmset($hash, foo => 1, bar => 2, baz => 3, qux => 4));
+#ok($o->hmset($hash, foo => 1, bar => 2, baz => 3, qux => 4));
 
-is_deeply([$o->hmget($hash, qw/foo bar baz/)], [1, 2, 3]);
+#is_deeply([$o->hmget($hash, qw/foo bar baz/)], [1, 2, 3]);
 
-is($o->hlen($hash), 4);
+#is($o->hlen($hash), 4);
 
-is_deeply([$o->hkeys($hash)], [qw/foo bar baz qux/]);
-is_deeply([$o->hvals($hash)], [qw/1 2 3 4/]);
-is_deeply({$o->hgetall($hash)}, {foo => 1, bar => 2, baz => 3, qux => 4});
+#is_deeply([$o->hkeys($hash)], [qw/foo bar baz qux/]);
+#is_deeply([$o->hvals($hash)], [qw/1 2 3 4/]);
+#is_deeply({$o->hgetall($hash)}, {foo => 1, bar => 2, baz => 3, qux => 4});
 
-ok($o->del($hash));                            # remove entire hash
+#ok($o->del($hash));                            # remove entire hash
 
 
 ## Multiple databases handling commands
 
-ok($o->select(1), 'select');
-ok($o->select(0), 'select');
-
-ok($o->move('foo', 1), 'move');
-ok(!$o->exists('foo'), 'gone');
-
-ok($o->select(1),     'select');
-ok($o->exists('foo'), 'exists');
-
-ok($o->flushdb, 'flushdb');
-cmp_ok($o->dbsize, '==', 0, 'empty');
-
+#ok($o->select(1), 'select');
+#ok($o->select(0), 'select');
+#
+#ok($o->move('foo', 1), 'move');
+#ok(!$o->exists('foo'), 'gone');
+#
+#ok($o->select(1),     'select');
+#ok($o->exists('foo'), 'exists');
+#
+#ok($o->flushdb, 'flushdb');
+#cmp_ok($o->dbsize, '==', 0, 'empty');
 
 ## Sorting
 
-ok($o->lpush('test-sort', $_), "put $_") foreach (1 .. 4);
-cmp_ok($o->llen('test-sort'), '==', 4, 'llen');
+#ok($o->lpush('test-sort', $_), "put $_") foreach (1 .. 4);
+#cmp_ok($o->llen('test-sort'), '==', 4, 'llen');
 
-is_deeply([$o->sort('test-sort')], [1, 2, 3, 4], 'sort');
-is_deeply([$o->sort('test-sort', 'DESC')], [4, 3, 2, 1], 'sort DESC');
+#is_deeply([$o->sort('test-sort')], [1, 2, 3, 4], 'sort');
+#is_deeply([$o->sort('test-sort', 'DESC')], [4, 3, 2, 1], 'sort DESC');
 
 
 ## "Persistence control commands"
@@ -310,16 +307,6 @@ isa_ok($info, 'HASH');
 ok($o->ping,  'ping() is true');
 ok($o->quit,  'quit');
 ok(!$o->ping, '... but after quit() returns false');
-
-$o = ReRe::Client->new(url => $srv);
-$o->shutdown();
-ok(!$o->ping(), 'ping() also false after shutdown()');
-
-sleep(1);
-throws_ok sub { ReRe::Client->url(server => $srv) },
-  qr/Could not connect to Redis server at $srv/,
-  'Failed connection throws exception';
-
 
 ## All done
 done_testing();

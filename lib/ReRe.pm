@@ -247,6 +247,7 @@ sub process {
       unless $self->user->has_role( $username, $method );
 
     my $ret = $self->server->execute( $method, @args );
+#    return { $method => @{$ret} } if ref($ret) eq 'ARRAY';
     return { $method => $ret };
 }
 
