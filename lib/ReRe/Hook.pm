@@ -21,11 +21,6 @@ Process the hook.
 
 =cut
 
-sub process {
-    my $self = shift;
-
-    $self->_hook;
-}
 
 no Moose;
 1;

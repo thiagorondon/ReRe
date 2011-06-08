@@ -1,13 +1,12 @@
 
-use Test::More tests => 4;
+use Test::More;
 use Test::Mock::Redis;
 
-package ReRe::Hook::Test;
+package ReRe::Hook::_Test;
 use Moose::Role;
 
-sub _hook {
-    my $self = shift;
-    return [ $self->method, $self->args, $self->conn ];
+sub test {
+  return 'test';
 }
 1;
 
@@ -15,13 +14,10 @@ package main;
 
 use_ok('ReRe::Hook');
 
-my $conn = Test::Mock::Redis->new(server => 'foo');
-my $class = ReRe::Hook->with_traits( '+ReRe::Role::Hook', 'Test' )
-    ->new( method => 'set', args => [ ('foo', 'bar') ], conn => $conn  );
+my $conn = Test::Mock::Redis->new( server => 'foo' );
+my $hook = ReRe::Hook->with_traits('_Test')->new;
 
-my ($p_method, $p_args, $p_conn) = @{$class->process};
+my $method = 'test';
+is( $hook->$method($conn), 'test' );
 
-is($p_method, 'set');
-is(@{$p_args}, 2);
-is(ref($p_conn), 'Test::Mock::Redis');
-
+done_testing;

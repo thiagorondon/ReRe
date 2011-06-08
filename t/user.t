@@ -6,7 +6,7 @@ my $usersconf = join('/', $Bin, 'etc', 'users.conf');
 
 use_ok ( 'ReRe::User' );
 
-my $acl = ReRe::User->new({ file => $usersconf });
+my $acl = ReRe::User->new_with_config( configfile => $usersconf );
 
 isa_ok($acl, 'ReRe::User');
 
