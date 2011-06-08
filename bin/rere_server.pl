@@ -91,7 +91,7 @@ any '/redis/:method/:var/:value/:extra' => {
           );
 
     my $json = Mojo::JSON->new;
-    my $output = $json->encode( $rere->process( $method, $var, $value, $extra, $username ) );
+    my $output = $json->encode( $rere->process( $username, $method, $var, $value, $extra ) );
 
     # JSONP
     $output = "$callback($output)" if $callback;

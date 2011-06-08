@@ -5,6 +5,7 @@ use Moose;
 use Redis;
 use ReRe::Config;
 use ReRe::Hook;
+use ReRe::Client::Methods qw(method_num_of_args);
 
 # VERSION
 
@@ -61,7 +62,9 @@ has hooks => (
 sub _builder_conn {
     my $self = shift;
     my $host = join( ':', $self->host, $self->port );
-    return Redis->new( server => $host );
+    my $conn = Redis->new( server => $host );
+    $conn->auth( $self->password ) if $self->has_password;
+    return $conn;
 }
 
 sub _builder_file {
@@ -82,23 +85,37 @@ Wrapper for L<Redis>.
 =cut
 
 sub execute {
-    my $self = shift;
-    my $method = shift or return '';
+    my $self    = shift;
+    my $method  = shift or return '';
+    my @in_args = @_;
+
     foreach my $hook ( $self->all_hooks ) {
         my $ret;
         eval {
             my $class
                 = ReRe::Hook->with_traits( '+ReRe::Role::Hook', $hook )
-                ->new( method => $method, args => [@_], conn => $self->conn );
+                ->new( method => $method, args => [@in_args], conn => $self->conn );
             $ret = $class->process;
         };
         warn $@ if $@;
         return $ret if $ret;
     }
-    $self->conn->auth( $self->password ) if $self->has_password;
 
-    my @args = grep {!/^$/} @_;
-    return @args ? $self->conn->$method(@args) : $self->conn->$method;
+    my $num_args = method_num_of_args($method);
+    my @args;
+
+    if ($num_args and $num_args != scalar(@in_args)) {
+        $num_args--;
+        push( @args, $in_args[$_] ? $in_args[$_] : '' ) for 0 .. $num_args;
+    }
+    else {
+        @args = grep { !/^$/ } @in_args;
+    }
+
+    #use Data::Dumper;
+    #warn Dumper($method, \@args);
+
+    return @args ? $self->conn->$method( @args ) : $self->conn->$method;
 }
 
 1;
