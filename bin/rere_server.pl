@@ -9,7 +9,6 @@ use strict;
 use Mojolicious::Lite;
 use ReRe;
 use Try::Tiny;
-use feature ":5.10";
 use Mojo::JSON;
 use Data::Dumper;
 
@@ -21,14 +20,14 @@ plugin 'basic_auth';
 my $rere = ReRe->new;
 
 sub error_config_users {
-    say "I don't find /etc/rere/users.conf";
-    say "Please, see http://www.rere.com.br to how create this file.";
+    print "I don't find /etc/rere/users.conf\n";
+    print "Please, see http://www.rere.com.br to how create this file.\n";
     exit -1;
 }
 
 sub error_server_ping {
-    say "I can't connect to redis server.";
-    say "Please, see http://www.rere.com.br for more information.";
+    print "I can't connect to redis server.\n";
+    print "Please, see http://www.rere.com.br for more information.\n";
     exit -2;
 }
 
