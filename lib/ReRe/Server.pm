@@ -95,7 +95,7 @@ sub execute {
 
   if ( $num_args and $num_args != scalar(@in_args) ) {
     $num_args--;
-    push( @args, $in_args[$_] ? $in_args[$_] : '' ) for 0 .. $num_args;
+    push( @args, defined($in_args[$_]) ? $in_args[$_] : '' ) for 0 .. $num_args;
   }
   else {
     @args = grep { !/^$/ } @in_args;

@@ -3,7 +3,6 @@ package ReRe::Websocket;
 
 use Moose;
 with 'MooseX::SimpleConfig';
-use ReRe::Config;
 
 # VERSION
 

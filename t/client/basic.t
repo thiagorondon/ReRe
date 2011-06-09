@@ -56,7 +56,8 @@ ok(!defined $o->get('non-existant'), 'get non-existant');
 my $key_next = 3;
 ok($o->set('key-next', 0),         'key-next = 0');
 ok($o->set('key-left', $key_next), 'key-left');
-#is_deeply([$o->mget('foo', 'key-next', 'key-left')], ['baz', 0, 3], 'mget');
+
+is_deeply($o->mget('foo', 'key-next', 'key-left'), ['baz', 0, 3], 'mget');
 
 my @keys;
 foreach my $id (0 .. $key_next) {
@@ -64,7 +65,7 @@ foreach my $id (0 .. $key_next) {
   push @keys, $key;
   ok($o->set($key, "$id"), "set $key");
   ok($o->exists($key), "exists $key");
-  #is($o->get($key), "$id", "get $key");
+  is($o->get($key), "$id", "get $key");
   cmp_ok($o->incr('key-next'), '==', $id + 1,             'incr');
   cmp_ok($o->decr('key-left'), '==', $key_next - $id - 1, 'decr');
 }
@@ -82,7 +83,7 @@ ok(!$o->del('non-existing'), 'del non-existing');
 
 cmp_ok($o->type('foo'), 'eq', 'string', 'type');
 
-is($o->keys('key-*'), $key_next + 1, 'key-*');
+#is($o->keys('key-*'), $key_next + 1, 'key-*');
 #is_deeply([$o->keys('key-*')], [@keys], 'keys');
 
 ok(my $key = $o->randomkey, 'randomkey');
@@ -108,7 +109,7 @@ ok($o->lpush($list, "l$_"), 'lpush') foreach (1 .. 2);
 cmp_ok($o->type($list), 'eq', 'list', 'type');
 cmp_ok($o->llen($list), '==', 5,      'llen');
 
-#is_deeply([$o->lrange($list, 0, 1)], ['l2', 'l1'], 'lrange');
+is_deeply($o->lrange($list, 0, 1), ['l2', 'l1'], 'lrange');
 
 ok($o->ltrim($list, 1, 2), 'ltrim');
 cmp_ok($o->llen($list), '==', 2, 'llen after ltrim');
@@ -149,7 +150,7 @@ $o->sadd('test-set2', $_) foreach ('foo', 'baz', 'xxx');
 
 my $inter = ['foo', 'baz'];
 
-#is_deeply([$o->sinter('test-set1', 'test-set2')], $inter, 'siter');
+is_deeply($o->sinter('test-set1', 'test-set2'), $inter, 'siter');
 
 ok($o->sinterstore('test-set-inter', 'test-set1', 'test-set2'),
   'sinterstore');
@@ -185,10 +186,10 @@ is($o->zrank($zset, 'foo'), 1);
 is($o->zrevrank($zset, 'bar'), 1);
 is($o->zrevrank($zset, 'foo'), 0);
 
-#ok($o->zadd($zset, 2.1, 'baz'));    # we now have bar foo baz
+#ok($o->zadd($zset, '2.1', 'baz'));    # we now have bar foo baz
 
-#is_deeply([$o->zrange($zset, 0, 1)], [qw/bar foo/]);
-#is_deeply([$o->zrevrange($zset, 0, 1)], [qw/baz foo/]);
+is_deeply($o->zrange($zset, 0, 1), [qw/bar foo/]);
+#is_deeply($o->zrevrange($zset, 0, 1), [qw/baz foo/]);
 
 
 #my $withscores = {$o->zrevrange($zset, 0, 1, 'WITHSCORES')};
@@ -232,32 +233,32 @@ is($o->zrevrank($zset, 'foo'), 0);
 my $hash = 'test-hash';
 $o->del($hash);
 
-ok($o->hset($hash, foo => 'bar'));
+ok($o->hset($hash, 'foo', 'bar'));
 is($o->hget($hash, 'foo'), 'bar');
 ok($o->hexists($hash, 'foo'));
 ok($o->hdel($hash, 'foo'));
 ok(!$o->hexists($hash, 'foo'));
 
-ok($o->hincrby($hash, incrtest => 1));
+ok($o->hincrby($hash, 'incrtest', 1));
 is($o->hget($hash, 'incrtest'), 1);
 
-is($o->hincrby($hash, incrtest => -1), 0);
+is($o->hincrby($hash, 'incrtest', -1), 0);
 is($o->hget($hash, 'incrtest'), 0);
 
 ok($o->hdel($hash, 'incrtest'));    #cleanup
 
-ok($o->hsetnx($hash, setnxtest => 'baz'));
-ok(!$o->hsetnx($hash, setnxtest => 'baz'));    # already exists, 0 returned
+ok($o->hsetnx($hash, 'setnxtest', 'baz'));
+ok(!$o->hsetnx($hash, 'setnxtest',  'baz'));    # already exists, 0 returned
 
 ok($o->hdel($hash, 'setnxtest'));              #cleanup
 
 #ok($o->hmset($hash, foo => 1, bar => 2, baz => 3, qux => 4));
-
-#is_deeply([$o->hmget($hash, qw/foo bar baz/)], [1, 2, 3]);
-
+#
+#is_deeply($o->hmget($hash, qw/foo bar baz/), [1, 2, 3]);
+#
 #is($o->hlen($hash), 4);
-
-#is_deeply([$o->hkeys($hash)], [qw/foo bar baz qux/]);
+#
+#is_deeply($o->hkeys($hash), [qw/foo bar baz qux/]);
 #is_deeply([$o->hvals($hash)], [qw/1 2 3 4/]);
 #is_deeply({$o->hgetall($hash)}, {foo => 1, bar => 2, baz => 3, qux => 4});
 
@@ -268,23 +269,23 @@ ok($o->hdel($hash, 'setnxtest'));              #cleanup
 
 #ok($o->select(1), 'select');
 #ok($o->select(0), 'select');
-#
+
 #ok($o->move('foo', 1), 'move');
 #ok(!$o->exists('foo'), 'gone');
-#
+
 #ok($o->select(1),     'select');
 #ok($o->exists('foo'), 'exists');
-#
-#ok($o->flushdb, 'flushdb');
-#cmp_ok($o->dbsize, '==', 0, 'empty');
+
+ok($o->flushdb, 'flushdb');
+cmp_ok($o->dbsize, '==', 0, 'empty');
 
 ## Sorting
 
-#ok($o->lpush('test-sort', $_), "put $_") foreach (1 .. 4);
-#cmp_ok($o->llen('test-sort'), '==', 4, 'llen');
+ok($o->lpush('test-sort', $_), "put $_") foreach (1 .. 4);
+cmp_ok($o->llen('test-sort'), '==', 4, 'llen');
 
-#is_deeply([$o->sort('test-sort')], [1, 2, 3, 4], 'sort');
-#is_deeply([$o->sort('test-sort', 'DESC')], [4, 3, 2, 1], 'sort DESC');
+is_deeply($o->sort('test-sort'), [1, 2, 3, 4], 'sort');
+is_deeply($o->sort('test-sort', 'DESC'), [4, 3, 2, 1], 'sort DESC');
 
 
 ## "Persistence control commands"

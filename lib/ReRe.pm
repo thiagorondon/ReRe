@@ -260,7 +260,7 @@ sub process {
 
   my $ret = $self->server->execute( $method, @args );
 
-  #    return { $method => @{$ret} } if ref($ret) eq 'ARRAY';
+  return { $method => [ @{$ret} ] } if ref($ret) eq 'ARRAY';
   return { $method => $ret };
 }
 
