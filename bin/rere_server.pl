@@ -74,6 +74,7 @@ any '/redis/:method/:var/:value/:extra' => {
     my $value    = $self->stash('value') || $self->param('value');
     my $extra    = $self->stash('extra') || $self->param('extra');
     my $callback = $self->param('callback') || '';
+    my $type     = $self->param('type') || ''; # text/xml, image/[png,jpeg], ...
 
     my $username = $self->session('name') || '';
 
@@ -98,8 +99,7 @@ any '/redis/:method/:var/:value/:extra' => {
 
   } => 'redis';
 
-if ( $rere->websocket->active ) {
-
+if ( ! $rere->websocket->active ) {
     websocket '/ws' => sub {
         my $self = shift;
 
@@ -121,6 +121,7 @@ if ( $rere->websocket->active ) {
         $self->on_message(
             sub {
                 my ( $self, $message ) = @_;
+                warn $message;
                 my ( $method, $var, $value, $extra ) = split( ' ', $message );
                 my $ret =
                   $rere->process( $method, $var, $value, $extra, $username );
