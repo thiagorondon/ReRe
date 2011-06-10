@@ -76,7 +76,7 @@ any '/redis/:method/:var/:value/:extra' => {
     my $extra    = $self->stash('extra') || $self->param('extra');
     my $callback = $self->param('callback') || '';
     my $type     = $self->param('type') || 'JSON'; # text/xml, image/[png,jpeg], ...
-    
+
     $type = 'JSONP' if $callback;
 
     my $username = $self->session('name') || '';
