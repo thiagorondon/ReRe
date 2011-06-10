@@ -13,14 +13,7 @@ has '+_trait_namespace' => ( default => 'ReRe::Hook' );
 
 Hooking, you can alter the behavior of an request method. See L<ReRe::Hook::Log> for example.
 
-=head1 METHOD
-
-=head2 process
-
-Process the hook.
-
 =cut
-
 
 no Moose;
 1;
