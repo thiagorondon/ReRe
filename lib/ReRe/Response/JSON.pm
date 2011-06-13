@@ -3,7 +3,7 @@ package ReRe::Response::JSON;
 
 use strict;
 use Moose::Role;
-use Mojo::JSON;
+use JSON::XS;
 
 # VERSION
 
@@ -28,7 +28,7 @@ sub unpack {
 
 sub pack {
     my $self = shift;
-    my $json = Mojo::JSON->new;
+    my $json = JSON::XS->new;
     return $json->encode( $self->data );
 }
 
