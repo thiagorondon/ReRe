@@ -2,14 +2,15 @@
 package ReRe::Request;
 
 use Moose;
+use Hash::MultiValue;
 
-=head2 remote_address
+=head2 address
 
 Returns the IP address of the client (REMOTE_ADDR).
 
 =cut
 
-has remote_address => (
+has address => (
     is => 'rw',
     isa => 'Str',
     default => '127.0.0.1'
@@ -24,7 +25,6 @@ Contains the request method (GET, POST, HEAD, etc).
 has request_method => (
     is => 'rw',
     isa => 'Str',
-    required => 1
 );
 
 =head2 path_info
@@ -37,6 +37,35 @@ has path_info => (
     is => 'rw',
     isa => 'Str',
     required => 1
+);
+
+has dbname => (
+    is => 'rw',
+    isa => 'Str',
+    lazy => 1,
+    builder => '_builder_dbname',
+);
+
+sub _builder_dbname {
+    my $self = shift;
+    my @args = split('/', $self->path_info);
+    # $self->meta->throw_error() if scalar < 3;
+    shift(@args); # root
+    my $dbname = shift(@args);
+    $self->method(shift(@args));
+    $self->args([@args]);
+    return $dbname;
+};
+
+has method => (
+    is => 'rw',
+    isa => 'Str',
+);
+
+has args => ( 
+    is => 'rw',
+    isa => 'ArrayRef',
+    default => sub { [] }
 );
 
 =head2 type
@@ -61,6 +90,26 @@ has username => (
     is => 'rw',
     isa => 'Str',
     default => ''
+);
+
+has parameters => (
+    is => 'rw',
+    isa => 'Hash::MultiValue',
+    default => sub { Hash::MultiValue->new() }
+);
+
+around parameters => sub {
+    my $orig = shift;
+    my $self = shift;
+    return $self->$orig() unless @_;
+    my ($hash) = @_;
+    return $self->$orig($hash);  
+};
+
+has extra => (
+    is => 'rw',
+    isa => 'Hash::MultiValue',
+    default => sub { Hash::MultiValue->new() }
 );
 
 1;

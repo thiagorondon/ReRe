@@ -5,7 +5,9 @@ use Moose;
 use ReRe::User;
 use ReRe::Server;
 use ReRe::Websocket;
+use ReRe::Response;
 
+use Try::Tiny;
 use List::Util qw(first);
 
 # ABSTRACT: Simple Redis Rest Interface
@@ -239,6 +241,7 @@ Start ReRe.
 
 sub start {
   my $self = shift;
+  $self->_check_config;
   $self->user->process;
   $self->server;
 }
@@ -250,18 +253,50 @@ Process the request to redis server.
 =cut
 
 sub process {
-  my $self     = shift;
-  my $username = shift;
-  my $method   = shift;
-  my @args     = @_;
+  my ($self, $request) = @_;
 
-  return { err => 'no_permission' }
-    unless $self->user->has_role( $username, $method );
+  my $dbname = $request->dbname;
+  my $method = $request->method;
+  my $username = $request->username;
+  my $args = $request->args;
+  my $type = $request->type;
+  my $callback = '';
 
-  my $ret = $self->server->execute( $method, @args );
+   my $ret = $self->server->execute( $method, @{$args} );
+   my $data = { $method => ref($ret) eq 'ARRAY' ? [ @{$ret} ] : $ret };
+          
+   ReRe::Response->with_traits( '+ReRe::Role::Response', $type )
+          ->new( data => $data, args => [$callback] );
 
-  return { $method => [ @{$ret} ] } if ref($ret) eq 'ARRAY';
-  return { $method => $ret };
+#  return { err => 'no_permission' }
+#    unless $self->user->has_role( $username, $method );
+
+}
+
+
+sub _check_config {
+    my $self = shift;
+
+    $self->_error_config_users unless -r $self->config_users();
+    $self->start;
+    try {
+        $self->server->execute('ping');
+    }
+    catch {
+        $self->_error_server_ping;
+    };
+}
+
+sub _error_config_users {
+    print "I don't find /etc/rere/users.conf\n";
+    print "Please, see http://www.rere.com.br to how create this file.\n";
+    exit -1;
+}
+
+sub _error_server_ping {
+    print "I can't connect to redis server.\n";
+    print "Please, see http://www.rere.com.br for more information.\n";
+    exit -2;
 }
 
 =head1 SUPPORT
