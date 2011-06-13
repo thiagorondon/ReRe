@@ -28,6 +28,8 @@ my $app = sub {
                     request_method     => $req->method,
                     username   => 'userall',
                     type       => $req->param('type') || 'JSON',
+                    extra      => Hash::MultiValue->new(
+                        callback => $req->param('callback') || '' ),
 
                 }
             )

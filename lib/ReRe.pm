@@ -14,45 +14,47 @@ use List::Util qw(first);
 # VERSION
 
 for my $item (qw/users server websocket/) {
-  has "config_$item" => (
-    is      => 'rw',
-    isa     => 'Str',
-    default => sub {
-      my $options = [ "/etc/rere/$item.conf", "etc/$item.conf" ];
-      my $found = first { -r } @$options;
-      return $found if $found;
-      die qq{Couldn't find a config file for $item, tried: } . join( ', ', @$options );
-    }
-  );
+    has "config_$item" => (
+        is      => 'rw',
+        isa     => 'Str',
+        default => sub {
+            my $options = [ "/etc/rere/$item.conf", "etc/$item.conf" ];
+            my $found = first { -r } @$options;
+            return $found if $found;
+            die qq{Couldn't find a config file for $item, tried: }
+              . join( ', ', @$options );
+        }
+    );
 }
 
 has user => (
-  is   => 'ro',
-  isa  => 'ReRe::User',
-  lazy => 1,
-  default =>
-    sub { ReRe::User->new_with_config( configfile => shift->config_users ) }
+    is   => 'ro',
+    isa  => 'ReRe::User',
+    lazy => 1,
+    default =>
+      sub { ReRe::User->new_with_config( configfile => shift->config_users ) }
 );
 
 has server => (
-  is         => 'rw',
-  isa        => 'ReRe::Server',
-  lazy_build => 1,
-  predicate  => 'has_server',
+    is         => 'rw',
+    isa        => 'ReRe::Server',
+    lazy_build => 1,
+    predicate  => 'has_server',
 );
 
 has websocket => (
-  is      => 'rw',
-  isa     => 'ReRe::Websocket',
-  lazy    => 1,
-  default => sub {
-    ReRe::Websocket->new_with_config( configfile => shift->config_websocket );
-  }
+    is      => 'rw',
+    isa     => 'ReRe::Websocket',
+    lazy    => 1,
+    default => sub {
+        ReRe::Websocket->new_with_config(
+            configfile => shift->config_websocket );
+    }
 );
 
 sub _build_server {
-  my $self = shift;
-  return ReRe::Server->new_with_config( configfile => $self->config_server );
+    my $self = shift;
+    return ReRe::Server->new_with_config( configfile => $self->config_server );
 
 }
 
@@ -240,10 +242,10 @@ Start ReRe.
 =cut
 
 sub start {
-  my $self = shift;
-  $self->_check_config;
-  $self->user->process;
-  $self->server;
+    my $self = shift;
+    $self->_check_config;
+    $self->user->process;
+    $self->server;
 }
 
 =head2 process
@@ -253,26 +255,25 @@ Process the request to redis server.
 =cut
 
 sub process {
-  my ($self, $request) = @_;
+    my ( $self, $request ) = @_;
 
-  my $dbname = $request->dbname;
-  my $method = $request->method;
-  my $username = $request->username;
-  my $args = $request->args;
-  my $type = $request->type;
-  my $callback = '';
+    my $dbname   = $request->dbname;
+    my $method   = $request->method;
+    my $username = $request->username;
+    my $args     = $request->args;
+    my $callback = $request->extra->get('callback');
+    my $type     = $callback ? 'JSONP' : $request->type;
 
-   my $ret = $self->server->execute( $method, @{$args} );
-   my $data = { $method => ref($ret) eq 'ARRAY' ? [ @{$ret} ] : $ret };
-          
-   ReRe::Response->with_traits( '+ReRe::Role::Response', $type )
-          ->new( data => $data, args => [$callback] );
+    my $ret = $self->server->execute( $method, @{$args} );
+    my $data = { $method => ref($ret) eq 'ARRAY' ? [ @{$ret} ] : $ret };
 
-#  return { err => 'no_permission' }
-#    unless $self->user->has_role( $username, $method );
+    ReRe::Response->with_traits( '+ReRe::Role::Response', $type )
+      ->new( data => $data, args => [$callback] );
+
+    #  return { err => 'no_permission' }
+    #    unless $self->user->has_role( $username, $method );
 
 }
-
 
 sub _check_config {
     my $self = shift;
