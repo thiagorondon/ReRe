@@ -267,8 +267,11 @@ sub process {
     my $ret = $self->server->execute( $method, @{$args} );
     my $data = { $method => ref($ret) eq 'ARRAY' ? [ @{$ret} ] : $ret };
 
-    ReRe::Response->with_traits( '+ReRe::Role::Response', $type )
-      ->new( data => $data, args => [$callback] );
+    ReRe::Response->with_traits( '+ReRe::Role::Response', $type )->new(
+        response_model => $request->response_model,
+        data           => $data,
+        args           => [$callback]
+    );
 
     #  return { err => 'no_permission' }
     #    unless $self->user->has_role( $username, $method );

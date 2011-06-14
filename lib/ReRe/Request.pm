@@ -112,5 +112,11 @@ has extra => (
     default => sub { Hash::MultiValue->new() }
 );
 
+has response_model => (
+    is => 'rw',
+    isa => 'Str',
+    default => 'pull'
+);
+
 1;
 
