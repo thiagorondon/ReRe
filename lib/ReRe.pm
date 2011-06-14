@@ -282,7 +282,6 @@ sub _check_config {
     my $self = shift;
 
     $self->_error_config_users unless -r $self->config_users();
-    $self->start;
     try {
         $self->server->execute('ping');
     }
