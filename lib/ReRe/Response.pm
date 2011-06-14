@@ -10,8 +10,8 @@ with 'MooseX::Traits';
 has '+_trait_namespace' => ( default => 'ReRe::Response' );
 
 has response_model => (
-    is => 'rw',
-    isa => 'Str',
+    is      => 'rw',
+    isa     => 'Str',
     default => 'pull'
 );
 

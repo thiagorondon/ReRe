@@ -260,6 +260,10 @@ sub process {
     my $dbname   = $request->dbname;
     my $method   = $request->method;
     my $username = $request->username;
+ 
+    return { err => 'no_permission' }
+        unless $self->user->has_role( $username, $method );
+
     my $args     = $request->args;
     my $callback = $request->extra->get('callback');
     my $type     = $callback ? 'JSONP' : $request->type;
@@ -272,10 +276,6 @@ sub process {
         data           => $data,
         args           => [$callback]
     );
-
-    #  return { err => 'no_permission' }
-    #    unless $self->user->has_role( $username, $method );
-
 }
 
 sub _check_config {

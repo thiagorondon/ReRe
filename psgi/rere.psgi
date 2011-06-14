@@ -18,6 +18,15 @@ my $app = sub {
         my $req     = Plack::Request->new($env);
         my $rere    = ReRe->new;
 
+        my $username = $rere->user->auth_ip( $req->address );
+
+        return sub {
+            [
+                301, [ 'Content-Type' => 'text/plain', 'Content-Length' => 7 ],
+                ['no_auth']
+            ];
+        } unless $username;
+
         my $request = ReRe::Request->new(
             {
                 address        => $req->address,
@@ -37,22 +46,24 @@ my $app = sub {
                 200,
                 [
                     'X-ReRe-Version' => $ReRe::VERSION,
-                    'Content-Type'   => 'application/json' #$response->content_type
+                    'Content-Type' =>
+                      'application/json'    #$response->content_type
                 ]
             ]
         );
-        my $dbname = $request->dbname; 
-        if ($request->method eq 'subscribe') {
+        my $dbname = $request->dbname;
+        if ( $request->method eq 'subscribe' ) {
             my $cb = sub {
-                my ($message, $topic, $subscribed_topic) = @_;
+                my ( $message, $topic, $subscribed_topic ) = @_;
                 $w->write("$message\n");
             };
-            
+
             $request->add_arg($cb);
             $rere->process($request);
-            $rere->server->execute('wait_for_messages', 60) while 1;
+            $rere->server->execute( 'wait_for_messages', 60 ) while 1;
 
-        } else {
+        }
+        else {
             my $response = $rere->process($request);
 
             return $w->write( $response->pack );
