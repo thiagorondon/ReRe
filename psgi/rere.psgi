@@ -18,15 +18,15 @@ my $app = sub {
         my $req     = Plack::Request->new($env);
         my $rere    = ReRe->new;
 
+        # TODO: Auth Basic
         my $username = $rere->user->auth_ip( $req->address );
-
-        return sub {
+        return $respond->(
             [
                 301, [ 'Content-Type' => 'text/plain', 'Content-Length' => 7 ],
                 ['no_auth']
-            ];
-        } unless $username;
-
+            ]
+        ) unless $username;
+        
         my $request = ReRe::Request->new(
             {
                 address        => $req->address,
