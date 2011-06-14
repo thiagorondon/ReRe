@@ -14,7 +14,7 @@ use Test::More;
 use Test::Exception;
 use ReRe::Client;
 
-my $srv = '127.0.0.1:3000';
+my $srv = '127.0.0.1:5000';
 
 ok(my $o = ReRe::Client->new( url => $srv ), 'connected to our test redis-server');
 ok($o->ping, 'ping');
@@ -306,8 +306,8 @@ isa_ok($info, 'HASH');
 ## Connection handling
 
 ok($o->ping,  'ping() is true');
-ok($o->quit,  'quit');
-ok(!$o->ping, '... but after quit() returns false');
+#ok($o->quit,  'quit');
+#ok(!$o->ping, '... but after quit() returns false');
 
 ## All done
 done_testing();
