@@ -41,7 +41,7 @@ my $app = sub {
             [
                 200,
                 [
-                    'X-ReRe-Version' => $rere->VERSION,
+                    'X-ReRe-Version' => $ReRe::VERSION,
                     'Content-Type'   => $response->content_type
                 ]
             ]
