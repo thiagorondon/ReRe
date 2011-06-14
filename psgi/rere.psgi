@@ -32,20 +32,31 @@ my $app = sub {
             }
         );
 
-        my $response = $rere->process($request);
-
         my $w = $respond->(
             [
                 200,
                 [
                     'X-ReRe-Version' => $ReRe::VERSION,
-                    'Content-Type'   => $response->content_type
+                    'Content-Type'   => 'application/json' #$response->content_type
                 ]
             ]
         );
+        my $dbname = $request->dbname; 
+        if ($request->method eq 'subscribe') {
+            my $cb = sub {
+                my ($message, $topic, $subscribed_topic) = @_;
+                $w->write("$message\n");
+            };
+            
+            $request->add_arg($cb);
+            $rere->process($request);
+            $rere->server->execute('wait_for_messages', 60) while 1;
 
-        return $w->write( $response->pack );
+        } else {
+            my $response = $rere->process($request);
 
+            return $w->write( $response->pack );
+        }
     };
 };
 

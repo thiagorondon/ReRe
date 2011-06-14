@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use Test::More tests => 9;
-use Test::Mojo;
+
 
 use FindBin;
 require "$FindBin::Bin/../bin/rere_server.pl";

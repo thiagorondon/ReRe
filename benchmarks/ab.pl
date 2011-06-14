@@ -16,7 +16,7 @@ my $url = 'http://127.0.0.1/redis/get/foo';
 
 my @try = (
     [ 'AnyEvent::HTTPD' ],
-#    [ 'HTTP::Server::PSGI' ],
+    [ 'HTTP::Server::PSGI' ],
     [ 'Twiggy' ],
     [ 'HTTP::Server::Simple' ],
     [ 'Corona' ],

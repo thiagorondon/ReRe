@@ -53,7 +53,7 @@ sub _builder_dbname {
     shift(@args); # root
     my $dbname = shift(@args);
     $self->method(shift(@args));
-    $self->args([@args]);
+    map { $self->add_arg($_) } @args;
     return $dbname;
 };
 
@@ -63,9 +63,14 @@ has method => (
 );
 
 has args => ( 
-    is => 'rw',
-    isa => 'ArrayRef',
-    default => sub { [] }
+    is => 'ro',
+    isa => 'ArrayRef[Any]',
+    traits => ['Array'],
+    default => sub { [] },
+    handles => {
+        all_args => 'elements',
+        add_arg => 'push'
+    }
 );
 
 =head2 type
