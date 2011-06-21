@@ -8,7 +8,6 @@ use ReRe;
 
 my $app = sub {
     my $env = shift;
-
     #    warn
     #"This app needs a server that supports psgi.streaming and psgi.nonblocking"
     #      unless $env->{'psgi.streaming'} && $env->{'psgi.nonblocking'};

@@ -1,21 +1,57 @@
 
-BEGIN {
-    unless ( $ENV{RELEASE_TESTING} ) {
-        require Test::More;
-        Test::More::plan( skip_all => 'these tests are for release candidate testing' );
-    }
-}
 
-use Test::More tests => 9;
-use Test::Mojo;
 
-use FindBin;
-require "$FindBin::Bin/../bin/rere_server.pl";
+use strict;
+use warnings;
+use FindBin qw($Bin);
+my $path_app = "$Bin/psgi/rere.psgi";
 
-my $t = Test::Mojo->new;
-$t->post_ok('/redis/set/foo/1?callback=Callback')->status_is(200)->content_like(qr/Callback\({\"set\":\"OK\"}\)/);
+use Test::More;
+use Plack::Test;
+use Plack::Loader;
+use Plack::Request;
 
-$t->get_ok('/redis/del/foo?callback=Callback')->status_is(200)->content_like(qr/del/);
+skip 'no app' unless -r $path_app;
 
-$t->post_ok('/redis/get/foo?callback=Callback')->status_is(200)->content_like(qr/null/);
+$Plack::Test::Impl = "Server";
+my $app = Plack::Util::load_psgi $path_app;
+
+test_psgi 
+	app => $app, 
+	client => sub {
+		my $cb = shift;
+		my $req = HTTP::Request->new(POST => '/redis/set/foo/1?callback=Callback');
+		my $res = $cb->($req);
+		is $res->code, 200;
+		is $res->content, 'Callback({"set":"OK"})';
+		is $res->content_type, 'application/json';
+
+	};
+
+test_psgi 
+	app => $app, 
+	client => sub {
+		my $cb = shift;
+		my $req = HTTP::Request->new(GET => '/redis/del/foo?callback=Callback');
+		my $res = $cb->($req);
+		is $res->code, 200;
+		is $res->content, 'Callback({"del":"1"})';
+		is $res->content_type, 'application/json';
+
+	};
+
+
+test_psgi 
+	app => $app, 
+	client => sub {
+		my $cb = shift;
+		my $req = HTTP::Request->new(POST => '/redis/get/foo?callback=Callback');
+		my $res = $cb->($req);
+		is $res->code, 200;
+		is $res->content, 'Callback({"get":null})';
+		is $res->content_type, 'application/json';
+
+	};
+
+done_testing;
 
