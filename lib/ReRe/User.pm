@@ -86,8 +86,8 @@ sub auth_ip {
   my %users = $self->_all_users;
   foreach my $user ( keys %users ) {
     my ( @roles, @allow );
-    @allow = @{ $users{$user}{allow} } if defined( $users{$user}{allow} );
-    @roles = @{ $users{$user}{roles} } if defined( $users{$user}{roles} );
+    @allow = split(' ',$users{$user}{allow}) if defined( $users{$user}{allow} );
+    @roles = split(' ',$users{$user}{roles}) if defined( $users{$user}{roles} );
     return $user if grep( /$ip|all/, @allow );
     return $user if $self->_check_cidr( $ip, @allow );
   }
@@ -127,8 +127,8 @@ sub _user_has_role {
   my ( $self, $username, $role, $ip ) = @_;
   my $user = $self->_find_user($username);
   my ( @roles, @allow );
-  @roles = @{ $user->{roles} } if defined( $user->{roles} );
-  @allow = @{ $user->{allow} } if defined( $user->{allow} );
+  @roles = split(' ', $user->{roles}) if defined( $user->{roles} );
+  @allow = split(' ', $user->{allow}) if defined( $user->{allow} );
   return grep( /$role|all/, @roles ) or grep( /$ip|all/, @allow ) ? 1 : 0;
 }
 

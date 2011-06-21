@@ -5,58 +5,62 @@ use Moose;
 use ReRe::User;
 use ReRe::Server;
 use ReRe::Websocket;
+use ReRe::Response;
 
+use Try::Tiny;
 use List::Util qw(first);
 
 # ABSTRACT: Simple Redis Rest Interface
 # VERSION
 
 for my $item (qw/users server websocket/) {
-  has "config_$item" => (
-    is      => 'rw',
-    isa     => 'Str',
-    default => sub {
-      my $options = [ "/etc/rere/$item.conf", "etc/$item.conf" ];
-      my $found = first { -r } @$options;
-      return $found if $found;
-      die qq{Couldn't find a config file for $item, tried: } . join( ', ', @$options );
-    }
-  );
+    has "config_$item" => (
+        is      => 'rw',
+        isa     => 'Str',
+        default => sub {
+            my $options = [ "/etc/rere/$item.conf", "etc/$item.conf" ];
+            my $found = first { -r } @$options;
+            return $found if $found;
+            die qq{Couldn't find a config file for $item, tried: }
+              . join( ', ', @$options );
+        }
+    );
 }
 
 has user => (
-  is   => 'ro',
-  isa  => 'ReRe::User',
-  lazy => 1,
-  default =>
-    sub { ReRe::User->new_with_config( configfile => shift->config_users ) }
+    is   => 'ro',
+    isa  => 'ReRe::User',
+    lazy => 1,
+    default =>
+      sub { ReRe::User->new_with_config( configfile => shift->config_users ) }
 );
 
 has server => (
-  is         => 'rw',
-  isa        => 'ReRe::Server',
-  lazy_build => 1,
-  predicate  => 'has_server',
+    is         => 'rw',
+    isa        => 'ReRe::Server',
+    lazy_build => 1,
+    predicate  => 'has_server',
 );
 
 has websocket => (
-  is      => 'rw',
-  isa     => 'ReRe::Websocket',
-  lazy    => 1,
-  default => sub {
-    ReRe::Websocket->new_with_config( configfile => shift->config_websocket );
-  }
+    is      => 'rw',
+    isa     => 'ReRe::Websocket',
+    lazy    => 1,
+    default => sub {
+        ReRe::Websocket->new_with_config(
+            configfile => shift->config_websocket );
+    }
 );
 
 sub _build_server {
-  my $self = shift;
-  return ReRe::Server->new_with_config( configfile => $self->config_server );
+    my $self = shift;
+    return ReRe::Server->new_with_config( configfile => $self->config_server );
 
 }
 
 =head1 DESCRIPTION
 
-ReRe is a simple redis rest interface write in Perl and L<Mojolicious>,
+ReRe is a simple redis rest interface write in Perl and L<PSGI> interface,
 with some features like:
 
 
@@ -238,9 +242,10 @@ Start ReRe.
 =cut
 
 sub start {
-  my $self = shift;
-  $self->user->process;
-  $self->server;
+    my $self = shift;
+    $self->_check_config;
+    $self->user->process;
+    $self->server;
 }
 
 =head2 process
@@ -250,18 +255,51 @@ Process the request to redis server.
 =cut
 
 sub process {
-  my $self     = shift;
-  my $username = shift;
-  my $method   = shift;
-  my @args     = @_;
+    my ( $self, $request ) = @_;
 
-  return { err => 'no_permission' }
-    unless $self->user->has_role( $username, $method );
+    #my $dbname   = $request->dbname;
+    my $method   = $request->method;
+    my $username = $request->username;
 
-  my $ret = $self->server->execute( $method, @args );
+    return { err => 'no_permission' }
+        unless $self->user->has_role( $username, $method );
 
-  return { $method => [ @{$ret} ] } if ref($ret) eq 'ARRAY';
-  return { $method => $ret };
+    my $args     = $request->args;
+    my $callback = $request->extra->get('callback');
+    my $type     = $callback ? 'JSONP' : $request->type;
+
+    my $ret = $self->server->execute( $method, @{$args} );
+    my $data = { $method => ref($ret) eq 'ARRAY' ? [ @{$ret} ] : $ret };
+
+    ReRe::Response->with_traits( '+ReRe::Role::Response', $type )->new(
+        response_model => $request->response_model,
+        data           => $data,
+        args           => [$callback]
+    );
+}
+
+sub _check_config {
+    my $self = shift;
+
+    $self->_error_config_users unless -r $self->config_users();
+    try {
+        $self->server->execute('ping');
+    }
+    catch {
+        $self->_error_server_ping;
+    };
+}
+
+sub _error_config_users {
+    print "I don't find /etc/rere/users.conf\n";
+    print "Please, see http://www.rere.com.br to how create this file.\n";
+    exit -1;
+}
+
+sub _error_server_ping {
+    print "I can't connect to redis server.\n";
+    print "Please, see http://www.rere.com.br for more information.\n";
+    exit -2;
 }
 
 =head1 SUPPORT

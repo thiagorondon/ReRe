@@ -1,9 +1,9 @@
 
-package ReRe::ContentType::JSONP;
+package ReRe::Response::JSONP;
 
 use strict;
 use Moose::Role;
-use Mojo::JSON;
+use JSON::XS;
 
 # VERSION
 
@@ -26,7 +26,7 @@ sub unpack {
 sub pack {
     my $self = shift;
     my $args = $self->args;
-    my $json = Mojo::JSON->new;
+    my $json = JSON::XS->new;
     my ($callback) = @{$args};
     my $output = $json->encode( $self->data );
     $output = "$callback($output)" if $callback;

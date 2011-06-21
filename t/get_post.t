@@ -1,21 +1,54 @@
 
+use strict;
+use warnings;
+
 BEGIN {
     unless ( $ENV{RELEASE_TESTING} ) {
         require Test::More;
-        Test::More::plan( skip_all => 'these tests are for release candidate testing' );
+        Test::More::plan(
+            skip_all => 'these tests are for release candidate testing' );
     }
 }
 
-use Test::More tests => 9;
-use Test::Mojo;
+use FindBin qw($Bin);
+my $path_app = "$Bin/../psgi/rere.psgi";
 
-use FindBin;
-require "$FindBin::Bin/../bin/rere_server.pl";
+use Test::More;
+use Plack::Test;
+use Plack::Loader;
+use Plack::Request;
 
-my $t = Test::Mojo->new;
-$t->post_ok('/redis/set/foo/1')->status_is(200)->content_like(qr/OK/);
+skip 'no app' unless -r $path_app;
 
-$t->get_ok('/redis/del/foo')->status_is(200)->content_like(qr/del/);
+$Plack::Test::Impl = "Server";
+my $app = Plack::Util::load_psgi $path_app;
 
-$t->post_ok('/redis/get/foo')->status_is(200)->content_like(qr/null/);
+test_psgi
+  app    => $app,
+  client => sub {
+    my $cb = shift;
+    {
+        my $req = HTTP::Request->new( POST => '/redis/set/foo/1' );
+        my $res = $cb->($req);
+        is $res->code,         200;
+        is $res->content,      '{"set":"OK"}';
+        is $res->content_type, 'application/json';
+    }
+    {
+        my $req = HTTP::Request->new( GET => '/redis/del/foo' );
+        my $res = $cb->($req);
+        is $res->code,         200;
+        is $res->content,      '{"del":"1"}';
+        is $res->content_type, 'application/json';
+    }
+    {
+        my $req = HTTP::Request->new( GET => '/redis/get/foo' );
+        my $res = $cb->($req);
+        is $res->code,         200;
+        is $res->content,      '{"get":null}';
+        is $res->content_type, 'application/json';
+    }
+  };
+
+done_testing();
 

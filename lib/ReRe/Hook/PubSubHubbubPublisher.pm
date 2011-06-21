@@ -3,6 +3,8 @@ package ReRe::Hook::PubSubHubbubPublisher;
 
 use Moose::Role;
 
+# VERSION
+
 has ua => (
     is        => 'rw',
     isa       => 'Object',
@@ -39,6 +41,12 @@ has last_res => (
     isa     => 'Str',
     default => '',
 );
+
+=head2 publish_update
+
+...
+
+=cut
 
 sub publish_update {
     my $self = shift;

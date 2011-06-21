@@ -80,6 +80,8 @@ sub execute {
   my $method  = shift or return '';
   my @in_args = @_;
 
+  map { warn $_; } $self->all_hooks;
+
 # TODO: For performance reasons, this could be a lookup table:
 # { method_foo => $hook_foo, method_bar => $hook_bar, method_quux => $hook_bar }
 

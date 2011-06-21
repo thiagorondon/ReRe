@@ -1,5 +1,5 @@
 
-package ReRe::ContentType::MessagePack;
+package ReRe::Response::MessagePack;
 
 use strict;
 use Moose::Role;
