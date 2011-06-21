@@ -2,7 +2,7 @@
 package ReRe::Client;
 
 use Moose;
-use Mojo::UserAgent;
+use LWP::UserAgent;
 use Data::Dumper;
 
 # VERSION
@@ -45,7 +45,7 @@ has ua => (
     is      => 'rw',
     isa     => 'Object',
     lazy    => 1,
-    default => sub { Mojo::UserAgent->new }
+    default => sub { LWP::UserAgent->new }
 );
 
 sub _get_rere {

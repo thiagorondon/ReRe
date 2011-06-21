@@ -60,7 +60,7 @@ sub _build_server {
 
 =head1 DESCRIPTION
 
-ReRe is a simple redis rest interface write in Perl and L<Mojolicious>,
+ReRe is a simple redis rest interface write in Perl and L<PSGI> interface,
 with some features like:
 
 
