@@ -61,7 +61,7 @@ sub _get_rere {
 
     $base_url .= '/' . $value if defined($value);
     $base_url .= '/' . $extra if defined($extra);
-    
+
     my $content = $self->ua->get($base_url)->decoded_content;
     my $json = from_json ($content);
     return $json->{$method};

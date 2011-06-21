@@ -62,7 +62,6 @@ sub _build_hooks {
 sub _builder_conn {
   my $self = shift;
   my $host = join( ':', $self->host, $self->port );
-  warn $host;
   my $conn = Redis->new( server => $host );
   $conn->auth( $self->password ) if $self->has_password;
   return $conn;
