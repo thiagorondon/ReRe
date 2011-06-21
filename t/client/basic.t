@@ -10,22 +10,24 @@ BEGIN {
 
 use warnings;
 use strict;
-use Test::More;
-use Test::Exception;
 use ReRe::Client;
 
 my $srv = '127.0.0.1:5000';
 my $o;
 
 eval {
-    ok($o = ReRe::Client->new( url => $srv ), 'connected to our test redis-server');
-    ok($o->ping, 'ping');
+    $o = ReRe::Client->new( url => $srv );
+    $o->ping;
 };
 
 if ($@) {
     Test::More::plan( skip_all => 'these tests need a rere server run in 127.0.0.1:5000' );
 }
 
+use Test::More;
+use Test::Exception;
+
+ok($o->ping, 'ping');
 
 ## Commands operating on string values
 
