@@ -13,7 +13,7 @@ use List::Util qw(first);
 # ABSTRACT: Simple Redis Rest Interface
 # VERSION
 
-for my $item (qw/users server websocket/) {
+for my $item (qw/users websocket/) {
     has "config_$item" => (
         is      => 'rw',
         isa     => 'Str',
@@ -46,15 +46,12 @@ has websocket => (
     is      => 'rw',
     isa     => 'ReRe::Websocket',
     lazy    => 1,
-    default => sub {
-        ReRe::Websocket->new_with_config(
-            configfile => shift->config_websocket );
-    }
+    default => sub { ReRe::Websocket->new; }
 );
 
 sub _build_server {
     my $self = shift;
-    return ReRe::Server->new_with_config( configfile => $self->config_server );
+    return ReRe::Server->new;
 
 }
 
@@ -262,7 +259,7 @@ sub process {
     my $username = $request->username;
 
     return { err => 'no_permission' }
-        unless $self->user->has_role( $username, $method );
+      unless $self->user->has_role( $username, $method );
 
     my $args     = $request->args;
     my $callback = $request->extra->get('callback');
