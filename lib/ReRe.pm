@@ -257,10 +257,10 @@ Process the request to redis server.
 sub process {
     my ( $self, $request ) = @_;
 
-    my $dbname   = $request->dbname;
+    #my $dbname   = $request->dbname;
     my $method   = $request->method;
     my $username = $request->username;
- 
+
     return { err => 'no_permission' }
         unless $self->user->has_role( $username, $method );
 

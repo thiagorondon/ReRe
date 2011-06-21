@@ -4,6 +4,8 @@ package ReRe::Request;
 use Moose;
 use Hash::MultiValue;
 
+# VERSION
+
 =head2 address
 
 Returns the IP address of the client (REMOTE_ADDR).
@@ -62,7 +64,7 @@ has method => (
     isa => 'Str',
 );
 
-has args => ( 
+has args => (
     is => 'ro',
     isa => 'ArrayRef[Any]',
     traits => ['Array'],
@@ -108,7 +110,7 @@ around parameters => sub {
     my $self = shift;
     return $self->$orig() unless @_;
     my ($hash) = @_;
-    return $self->$orig($hash);  
+    return $self->$orig($hash);
 };
 
 has extra => (
