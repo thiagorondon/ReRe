@@ -19,10 +19,8 @@ sub DESTROY { }
 
 sub AUTOLOAD {
     my $self    = shift;
-    my $command = $AUTOLOAD;
-    $command =~ s/.*://;
-    my @args = @_;
-    $self->_get_rere( $command, @args );
+    (my $command = $AUTOLOAD) =~ s/.*://;;
+    $self->_get_rere( $command, @_);
 }
 
 has url => (
