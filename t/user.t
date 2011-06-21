@@ -1,6 +1,5 @@
 
-use Test::More tests => 13;
-Test::More::plan( skip_all => 'need to work');
+use Test::More skip_all => 'need to work';
 
 use FindBin qw($Bin);
 my $usersconf = join('/', $Bin, 'etc', 'users.conf');
