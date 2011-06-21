@@ -1,17 +1,39 @@
+use strict;
+use warnings;
 
 BEGIN {
     unless ( $ENV{RELEASE_TESTING} ) {
         require Test::More;
-        Test::More::plan( skip_all => 'these tests are for release candidate testing' );
+        Test::More::plan(
+            skip_all => 'these tests are for release candidate testing' );
     }
 }
 
-use Test::More tests => 3;
-use Test::Mojo;
+use FindBin qw($Bin);
+my $path_app = "$Bin/../../psgi/rere.psgi";
 
-use FindBin;
-require "$FindBin::Bin/../../bin/rere_server.pl";
+use Test::More;
+use Plack::Test;
+use Plack::Loader;
+use Plack::Request;
 
-my $t = Test::Mojo->new;
-$t->get_ok('/redis/info')->status_is(200)->content_like(qr/{"info":{/);
+skip 'no app' unless -r $path_app;
+
+$Plack::Test::Impl = "Server";
+my $app = Plack::Util::load_psgi $path_app;
+
+test_psgi
+  app    => $app,
+  client => sub {
+    my $cb = shift;
+    {
+        my $req = HTTP::Request->new( POST => '/redis/info' );
+        my $res = $cb->($req);
+        is $res->code,         200;
+        like $res->content,    qr/info/;
+        is $res->content_type, 'application/json';
+    }
+  };
+
+done_testing();
 

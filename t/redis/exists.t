@@ -41,6 +41,14 @@ test_psgi
         is $res->content,      '{"exists":"1"}';
         is $res->content_type, 'application/json';
     }
+    {
+        my $req = HTTP::Request->new( GET => '/redis/type/foo' );
+        my $res = $cb->($req);
+        is $res->code,         200;
+        is $res->content,      '{"type":"string"}';
+        is $res->content_type, 'application/json';
+    }
+
   };
 
 done_testing();

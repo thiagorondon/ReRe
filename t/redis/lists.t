@@ -1,26 +1,66 @@
+use strict;
+use warnings;
 
 BEGIN {
     unless ( $ENV{RELEASE_TESTING} ) {
         require Test::More;
-        Test::More::plan( skip_all => 'these tests are for release candidate testing' );
+        Test::More::plan(
+            skip_all => 'these tests are for release candidate testing' );
     }
 }
 
-use Test::More tests => 11;
-use Test::Mojo;
+use FindBin qw($Bin);
+my $path_app = "$Bin/../../psgi/rere.psgi";
 
-use FindBin;
-require "$FindBin::Bin/../../bin/rere_server.pl";
+use Test::More;
+use Plack::Test;
+use Plack::Loader;
+use Plack::Request;
 
-my $t = Test::Mojo->new;
+skip 'no app' unless -r $path_app;
 
-$t->get_ok('/redis/del/bar');
+$Plack::Test::Impl = "Server";
+my $app = Plack::Util::load_psgi $path_app;
 
-$t->get_ok('/redis/rpush/bar/1')->status_is(200);
+test_psgi
+  app    => $app,
+  client => sub {
+    my $cb = shift;
+    {
+        my $req = HTTP::Request->new( POST => '/redis/del/bar' );
+        my $res = $cb->($req);
+        is $res->code,         200;
+        is $res->content_type, 'application/json';
+    }
+    {
+        my $req = HTTP::Request->new( GET => '/redis/rpush/bar/1' );
+        my $res = $cb->($req);
+        is $res->code,         200;
+        is $res->content_type, 'application/json';
+    }
+    {
+        my $req = HTTP::Request->new( GET => '/redis/lpush/bar/2' );
+        my $res = $cb->($req);
+        is $res->code,         200;
+        is $res->content_type, 'application/json';
+    }
+    {
+        my $req = HTTP::Request->new( GET => '/redis/llen/2' );
+        my $res = $cb->($req);
+        is $res->code, 200;
 
-$t->get_ok('/redis/lpush/bar/2')->status_is(200);
+        #is $res->content, '{"llen":"0"}';
+        is $res->content_type, 'application/json';
+    }
+    {
+        my $req = HTTP::Request->new( GET => '/redis/lrange/bar/0/2' );
+        my $res = $cb->($req);
+        is $res->code,         200;
+        is $res->content,      '{"lrange":["2","1"]}';
+        is $res->content_type, 'application/json';
+    }
 
-$t->get_ok('/redis/llen/bar')->status_is(200)->content_like(qr/{"llen":/);
+  };
 
-$t->get_ok('/redis/lrange/bar/0/2')->status_is(200)->content_like(qr/"lrange":\["2","1"\]}/);
+done_testing();
 
