@@ -62,6 +62,7 @@ sub _build_hooks {
 sub _builder_conn {
   my $self = shift;
   my $host = join( ':', $self->host, $self->port );
+  warn $host;
   my $conn = Redis->new( server => $host );
   $conn->auth( $self->password ) if $self->has_password;
   return $conn;
@@ -79,6 +80,8 @@ sub execute {
   my $self    = shift;
   my $method  = shift or return '';
   my @in_args = @_;
+
+  map { warn $_; } $self->all_hooks;
 
 # TODO: For performance reasons, this could be a lookup table:
 # { method_foo => $hook_foo, method_bar => $hook_bar, method_quux => $hook_bar }

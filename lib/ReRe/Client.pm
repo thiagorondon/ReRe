@@ -4,6 +4,7 @@ package ReRe::Client;
 use Moose;
 use LWP::UserAgent;
 use Data::Dumper;
+use JSON;
 
 # VERSION
 
@@ -20,7 +21,8 @@ sub DESTROY { }
 sub AUTOLOAD {
     my $self    = shift;
     (my $command = $AUTOLOAD) =~ s/.*://;;
-    $self->_get_rere( $command, @_);
+
+    $self->_get_rere( $command, @_)
 }
 
 has url => (
@@ -59,8 +61,9 @@ sub _get_rere {
 
     $base_url .= '/' . $value if defined($value);
     $base_url .= '/' . $extra if defined($extra);
-
-    my $json = $self->ua->get($base_url)->res->json;
+    
+    my $content = $self->ua->get($base_url)->decoded_content;
+    my $json = from_json ($content);
     return $json->{$method};
 }
 
